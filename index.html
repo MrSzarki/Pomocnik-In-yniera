@@ -233,10 +233,40 @@ mark { background: color-mix(in srgb, var(--accent) 35%, transparent); color: in
 #viewer .vbar .inner { display: flex; gap: 8px; align-items: center; min-height: 56px; padding-block: 6px; }
 #viewer .vt { flex: 1; min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 #viewer .pg { font: 500 13px var(--mono); color: var(--muted); white-space: nowrap; }
-#vscroll { flex: 1; overflow: auto; padding: 12px 0 calc(24px + env(safe-area-inset-bottom, 0px)); -webkit-overflow-scrolling: touch; }
+#vscroll { position: relative; flex: 1; overflow: auto; padding: 12px 0 calc(24px + env(safe-area-inset-bottom, 0px)); -webkit-overflow-scrolling: touch; }
 .vpages { display: grid; gap: 12px; justify-items: center; padding-left: max(12px, env(safe-area-inset-left, 0px)); padding-right: max(12px, env(safe-area-inset-right, 0px)); }
 .vpage { background: #fff; box-shadow: var(--shadow); position: relative; }
 .vpage canvas { display: block; width: 100%; height: 100%; }
+.vpage .hlayer { position: absolute; inset: 0; pointer-events: none; }
+.hl { position: absolute; background: rgba(229,160,25,.32); border-radius: 2px; }
+.hl.cur { background: rgba(229,160,25,.6); box-shadow: 0 0 0 2px #b97700; }
+#viewer .vsearch { background: var(--surface); border-bottom: 1px solid var(--line); }
+.vs-row { display: flex; gap: 6px; align-items: center; padding-block: 8px; }
+.vs-row input { flex: 1; min-width: 0; height: 42px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-2); padding: 0 12px; font-size: 16px; }
+.vs-row .iconbtn { width: 38px; height: 42px; font-size: 18px; }
+.vs-row .iconbtn[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.vs-count { font: 500 12.5px var(--mono); color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.vs-results { max-height: 38vh; overflow: auto; border-top: 1px solid var(--line); padding-bottom: 6px; }
+.vs-res { display: block; width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--line); background: none; padding: 10px 4px; font-size: 14px; line-height: 1.35; color: var(--ink); overflow-wrap: anywhere; }
+.vs-res .pgn { font: 700 12px var(--mono); color: var(--blue); margin-right: 8px; }
+.vs-res[aria-current="true"] { background: var(--blue-soft); }
+.vzoom { position: absolute; right: max(12px, env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); display: grid; gap: 8px; z-index: 2; }
+.vzoom .iconbtn, .vmark { box-shadow: var(--shadow); }
+.vmark { position: absolute; left: 50%; transform: translateX(-50%); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 2; }
+#viewer.marking .vmark { background: var(--blue); border-color: var(--blue); color: #fff; }
+.vhint { background: var(--blue); color: #fff; font-size: 14px; font-weight: 600; }
+.vhint .inner { padding-block: 9px; }
+#viewer.marking .vpage { touch-action: none; cursor: crosshair; outline: 2px dashed var(--blue); outline-offset: 3px; }
+.selbox { position: absolute; border: 2px dashed var(--blue); background: rgba(29, 93, 138, .14); pointer-events: none; z-index: 1; }
+.mk { position: absolute; border: 2px solid var(--blue); background: rgba(29, 93, 138, .10); border-radius: 3px; }
+.mk.focus { border-width: 3px; background: rgba(29, 93, 138, .18); box-shadow: 0 0 0 4px rgba(29, 93, 138, .25); }
+.mk span, .mk-page span { position: absolute; left: -2px; bottom: 100%; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 600 11px var(--body); background: #1d5d8a; color: #fff; padding: 2px 6px; border-radius: 4px 4px 0 0; }
+.mk-page { position: absolute; right: 0; top: 0; width: 0; height: 0; }
+.mk-page span { left: auto; right: 0; bottom: auto; top: 0; border-radius: 0 0 0 6px; }
+.item.chap { padding: 0; }
+.chap-go { flex: 1; min-width: 0; display: flex; gap: 12px; align-items: center; border: 0; background: none; text-align: left; color: inherit; padding: 12px 0 12px 14px; min-height: 60px; }
+.item.chap > .iconbtn { margin-right: 10px; border-color: transparent; }
+.quote { border-left: 3px solid var(--blue); padding: 2px 0 2px 10px; color: var(--muted); font-size: 13.5px; font-style: italic; }
 .vpage .n { position: absolute; left: -2px; top: -2px; font: 600 11px var(--mono); background: var(--ink); color: var(--paper); padding: 2px 6px; border-radius: 0 0 6px 0; }
 
 .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(var(--tabh) + env(safe-area-inset-bottom, 0px) + 16px); z-index: 50; background: var(--ink); color: var(--paper); padding: 11px 16px; border-radius: 10px; font-size: 14.5px; font-weight: 600; box-shadow: var(--shadow); max-width: calc(100% - 32px); }
@@ -415,7 +445,7 @@ window.addEventListener('popstate', (e) => {
   if ($('#annot')) { $('#annot [data-a="cancel"]').click(); pushHistory({ route: S.route }); return; }
   if (!$('#confirm').hidden) { $('#confirm').click && $('#confirm').querySelector('[data-c="0"]')?.click(); pushHistory({ route: S.route }); return; }
   if (!$('#sheet').hidden) { closeSheet(true); pushHistory({ route: S.route }); return; }
-  if (!$('#viewer').hidden) { closeViewer(true); return; }
+  if (!$('#viewer').hidden) { if (VW.marking) { toggleMarking(false); pushHistory({ overlay: 'viewer' }); return; } closeViewer(true); return; }
   const r = e.state && e.state.route;
   if (r) { S.route = r; render(); window.scrollTo(0, 0); }
 });
@@ -451,7 +481,7 @@ const SEED = {
 };
 
 // ---------- Library loading (local files, cached by the service worker) ----------
-const APP_VERSION = '1.0.0';
+const APP_VERSION = '1.2.0';
 const loadedScripts = {};
 function loadScript(src) {
   if (!loadedScripts[src]) loadedScripts[src] = new Promise((res, rej) => {
@@ -905,7 +935,7 @@ function libSearch(q) {
   const res = [];
   for (const d of S.docs) {
     const head = fold([d.number, d.title, d.notes, d.tags].join(' '));
-    const chHits = (d.chapters || []).filter((c) => { const t = fold([c.no, c.title, c.notes].join(' ')); return terms.every((w) => t.includes(w) || head.includes(w)) && terms.some((w) => t.includes(w)); });
+    const chHits = (d.chapters || []).filter((c) => { const t = fold([c.no, c.title, c.notes, c.quote].join(' ')); return terms.every((w) => t.includes(w) || head.includes(w)) && terms.some((w) => t.includes(w)); });
     const headOk = terms.every((w) => head.includes(w));
     if (headOk || chHits.length) res.push({ d, chHits, score: (headOk ? 2 : 0) + (fold(d.number).includes(terms[0]) ? 3 : 0) });
   }
@@ -1016,7 +1046,7 @@ VIEWS.doc = {
     const box = $('#docView', main); const d = S.docs.find((x) => x.id === r.id);
     if (!d) { box.innerHTML = `<header class="bar gut"><div class="inner"><button class="iconbtn" type="button" data-act="back-lib" aria-label="Wstecz">${ICON.back}</button><div class="grow"><h1>Dokument</h1></div></div></header><div class="gut"><div class="inner"><p class="note" style="margin-top:16px">${S.loaded.docs ? 'Ten dokument nie istnieje lub został usunięty.' : 'Wczytywanie…'}</p></div></div>`; return; }
     const path = sectionPath(d.section).map((s) => s.name).join(' › ') || 'Biblioteka';
-    const ch = (d.chapters || []).slice().sort((a, b) => String(a.no || '').localeCompare(String(b.no || ''), 'pl', { numeric: true }));
+    const ch = (d.chapters || []).slice().sort((a, b) => ((+a.page || 1e9) - (+b.page || 1e9)) || String(a.no || '').localeCompare(String(b.no || ''), 'pl', { numeric: true }));
     box.innerHTML = `
       <header class="bar gut"><div class="inner">
         <button class="iconbtn" type="button" data-act="back-lib" aria-label="Wstecz">${ICON.back}</button>
@@ -1033,58 +1063,98 @@ VIEWS.doc = {
           ${d.asset ? `<button class="btn primary" type="button" data-act="pdf-open" data-id="${d.id}">${ICON.pdf} Otwórz PDF</button>` : `<button class="btn" type="button" data-act="doc-edit" data-id="${d.id}">${ICON.pdf} Dołącz PDF</button>`}
           ${d.url ? `<a class="btn" href="${esc(d.url)}" target="_blank" rel="noopener">${ICON.link} Źródło online</a>` : ''}
         </div>
+        ${d.asset ? `<form class="search" id="docSearch" role="search" style="margin-top:14px">${ICON.search}<input id="docQ" type="search" placeholder="Szukaj w treści tego PDF…" autocomplete="off" aria-label="Szukaj w treści PDF" enterkeyhint="search" data-id="${d.id}"></form>` : ''}
         ${d.notes ? `<div class="label"><span>Notatki</span></div><div class="note prose" style="color:var(--ink)">${esc(d.notes)}</div>` : ''}
         <div class="label"><span>Rozdziały i zapisy</span><button class="btn ghost sm" type="button" data-act="ch-new" data-id="${d.id}">${ICON.plus} Dodaj</button></div>
-        ${ch.length ? `<div class="list">${ch.map((c) => `<button class="item chap" type="button" data-act="ch-open" data-id="${d.id}" data-ch="${esc(c.id)}">
-            <span class="no">${esc(c.no || '§')}</span><span class="body"><div class="t">${esc(c.title || 'Bez tytułu')}</div>${c.notes ? `<div class="m">${esc(c.notes.slice(0, 120))}${c.notes.length > 120 ? '…' : ''}</div>` : ''}</span>
-            ${c.page ? `<span class="pg">s. ${esc(c.page)}</span>` : ''}<span class="chev">${ICON.chev}</span></button>`).join('')}</div>`
-          : `<div class="empty"><h3>Brak rozdziałów</h3><p>Dodaj rozdziały lub paragrafy z numerem strony w PDF i własną notatką. Będą też przeszukiwane.</p><button class="btn primary" type="button" data-act="ch-new" data-id="${d.id}">${ICON.plus} Dodaj rozdział</button></div>`}
+        ${ch.length ? `<div class="list">${ch.map((c) => { const txt = c.notes || c.quote || ''; return `<div class="item chap">
+            <button class="chap-go" type="button" data-act="${d.asset && c.page ? 'ch-go' : 'ch-open'}" data-id="${d.id}" data-ch="${esc(c.id)}">
+            <span class="no">${esc(c.no || (c.rect ? '▣' : '§'))}</span><span class="body"><div class="t">${esc(c.title || 'Bez tytułu')}</div>${txt ? `<div class="m">${esc(txt.slice(0, 120))}${txt.length > 120 ? '…' : ''}</div>` : ''}</span>
+            ${c.page ? `<span class="pg">s. ${esc(c.page)}</span>` : ''}</button>
+            <button class="iconbtn" type="button" data-act="ch-open" data-id="${d.id}" data-ch="${esc(c.id)}" aria-label="Edytuj zapis">${ICON.edit}</button></div>`; }).join('')}</div>
+            ${d.asset ? '<p class="note" style="margin-top:10px">Dotknij zapisu, aby otworzyć PDF w tym miejscu. Nowe zapisy dodasz też w podglądzie PDF przyciskiem „Zaznacz fragment”.</p>' : ''}`
+          : `<div class="empty"><h3>Brak zapisów</h3><p>${d.asset ? 'Otwórz PDF i użyj przycisku „Zaznacz fragment”: przeciągnij palcem po ważnym fragmencie, nadaj tytuł i opis. Możesz też dodać rozdział ręcznie.' : 'Dodaj rozdziały lub paragrafy z numerem strony i własną notatką. Będą też przeszukiwane.'}</p>
+            <div class="row" style="justify-content:center">${d.asset ? `<button class="btn primary" type="button" data-act="pdf-open" data-id="${d.id}">${ICON.pdf} Otwórz PDF</button>` : ''}<button class="btn" type="button" data-act="ch-new" data-id="${d.id}">${ICON.plus} Dodaj ręcznie</button></div></div>`}
         ${d.fileName ? `<p class="m" style="color:var(--muted);font-size:13px;margin-top:16px">Plik: ${esc(d.fileName)}</p>` : ''}
       </div></div>`;
   },
 };
-function openChapterForm(doc, chId) {
+function openChapterForm(doc, chId, preset) {
   const c = (doc.chapters || []).find((x) => x.id === chId) || null;
-  const isNew = !c; const cur = c || { id: 'c' + Date.now().toString(36), no: '', title: '', page: '', notes: '' };
-  openSheet(`<h2>${isNew ? 'Nowy rozdział' : 'Rozdział'}</h2><p class="lead">${esc(doc.number || doc.title)}</p>
+  const isNew = !c;
+  const cur = c || { id: 'c' + Date.now().toString(36), no: '', title: '', page: preset ? String(preset.page) : '', notes: '', rect: preset ? preset.rect : null, quote: preset ? preset.quote : '' };
+  const fromPdf = !!(preset || cur.rect || cur.quote);
+  openSheet(`<h2>${isNew ? (preset ? 'Nowy zapis z PDF' : 'Nowy rozdział') : 'Zapis'}</h2>
+    <p class="lead">${esc(doc.number || doc.title)}${cur.page ? ` · strona ${esc(cur.page)}` : ''}${cur.rect ? ' · zaznaczony obszar' : (preset ? ' · cała strona' : '')}</p>
     <form class="form" id="chForm">
-      <div class="two"><label class="field"><span>Nr rozdziału / §</span><input id="cNo" maxlength="30" value="${esc(cur.no)}" placeholder="np. 5.4 lub § 94"></label>
+      <label class="field"><span>Tytuł</span><input id="cTitle" maxlength="200" ${fromPdf ? 'required' : ''} value="${esc(cur.title)}" placeholder="np. Minimalna otulina zbrojenia"></label>
+      <label class="field"><span>Krótki opis – czego dotyczy</span><textarea id="cNotes" rows="3" placeholder="np. Wartości cmin,dur dla klas ekspozycji, sprawdzać przy odbiorze stropów">${esc(cur.notes)}</textarea></label>
+      ${fromPdf ? `<label class="field"><span>Zaznaczony fragment (tekst z PDF, możesz poprawić)</span><textarea id="cQuote" rows="3" placeholder="${cur.rect ? 'Brak tekstu w zaznaczeniu (np. rysunek lub skan)' : 'Opcjonalnie'}">${esc(cur.quote || '')}</textarea></label>` : ''}
+      <div class="two"><label class="field"><span>Nr rozdziału / § (opcjonalnie)</span><input id="cNo" maxlength="30" value="${esc(cur.no)}" placeholder="np. 4.4.1 lub § 94"></label>
       <label class="field"><span>Strona w PDF</span><input id="cPage" type="number" min="1" inputmode="numeric" value="${esc(cur.page)}" placeholder="np. 42"></label></div>
-      <label class="field"><span>Tytuł</span><input id="cTitle" maxlength="200" value="${esc(cur.title)}" placeholder="np. Otulina zbrojenia"></label>
-      <label class="field"><span>Notatka / treść</span><textarea id="cNotes" rows="5" placeholder="Najważniejsze wymagania, wartości, tolerancje…">${esc(cur.notes)}</textarea></label>
       <div class="actions">${isNew ? '' : '<button class="btn danger" type="button" id="cDel">Usuń</button><span class="spacer"></span>'}
-        ${!isNew && doc.asset && cur.page ? `<button class="btn" type="button" id="cGo">${ICON.pdf} Strona ${esc(cur.page)}</button>` : ''}
+        ${!isNew && doc.asset && cur.page ? `<button class="btn" type="button" id="cGo">${ICON.pdf} Pokaż w PDF</button>` : ''}
         <button class="btn" type="button" data-act="sheet-close">Anuluj</button><button class="btn primary" type="submit">Zapisz</button></div>
     </form>`, (el) => {
+    if (preset) setTimeout(() => $('#cTitle', el).focus(), 60);
     $('#chForm', el).onsubmit = async (e) => {
       e.preventDefault();
-      const item = { id: cur.id, no: $('#cNo', el).value.trim(), title: $('#cTitle', el).value.trim(), page: $('#cPage', el).value.trim(), notes: $('#cNotes', el).value };
-      const list = (doc.chapters || []).filter((x) => x.id !== cur.id).concat(item);
-      try { await patch(COLS.docs, doc.id, { chapters: list, updatedAt: Date.now() }); closeSheet(); toast('Zapisano rozdział'); } catch (err) { toast(dbErr(err)); }
+      const page = $('#cPage', el).value.trim();
+      const item = { id: cur.id, no: $('#cNo', el).value.trim(), title: $('#cTitle', el).value.trim(), page, notes: $('#cNotes', el).value,
+        rect: page === String(cur.page) ? (cur.rect || null) : null, quote: $('#cQuote', el) ? $('#cQuote', el).value.trim() : (cur.quote || '') };
+      const fresh = S.docs.find((x) => x.id === doc.id) || doc;
+      const list = (fresh.chapters || []).filter((x) => x.id !== cur.id).concat(item);
+      try {
+        await patch(COLS.docs, doc.id, { chapters: list, updatedAt: Date.now() }); closeSheet(); toast(preset ? 'Dodano zapis' : 'Zapisano');
+        if (!$('#viewer').hidden) { VW.focus = item.id; setTimeout(refreshHighlights, 250); }
+      } catch (err) { toast(dbErr(err)); }
     };
     const del = $('#cDel', el);
     if (del) del.onclick = async () => {
-      if (!(await askConfirm('Usunąć rozdział?', cur.title || cur.no || ''))) return;
-      try { await patch(COLS.docs, doc.id, { chapters: (doc.chapters || []).filter((x) => x.id !== cur.id) }); closeSheet(); } catch (err) { toast(dbErr(err)); }
+      if (!(await askConfirm('Usunąć zapis?', cur.title || cur.no || ''))) return;
+      const fresh = S.docs.find((x) => x.id === doc.id) || doc;
+      try { await patch(COLS.docs, doc.id, { chapters: (fresh.chapters || []).filter((x) => x.id !== cur.id) }); closeSheet(); if (!$('#viewer').hidden) setTimeout(refreshHighlights, 250); } catch (err) { toast(dbErr(err)); }
     };
     const go = $('#cGo', el);
-    if (go) go.onclick = () => { closeSheet(); openViewer(doc, parseInt(cur.page, 10) || 1); };
+    if (go) go.onclick = () => { closeSheet(); goToChapter(doc, cur); };
   });
 }
+function goToChapter(doc, c) {
+  if (!$('#viewer').hidden && VW.docId === doc.id && VW.pdf) focusMark(c.id);
+  else openViewer(doc, parseInt(c.page, 10) || 1, '', c.id);
+}
 
-// ---------------- PDF VIEWER (library) ----------------
-const VW = { pdf: null, zoom: 1, rendered: new Map(), obs: null, ratio: 1.414, token: 0 };
-async function openViewer(doc, page = 1) {
+// ---------------- PDF VIEWER (library) with in-document search ----------------
+const VW = { pdf: null, zoom: 1, rendered: new Map(), obs: null, ratio: 1.414, token: 0, text: null, matches: [], cur: -1, q: '', docId: null, focus: null, marking: false };
+async function openViewer(doc, page = 1, query = '', focusId = null) {
   const v = $('#viewer');
   v.innerHTML = `<div class="vbar gut"><div class="inner">
       <button class="iconbtn" type="button" data-act="viewer-close" aria-label="Zamknij">${ICON.back}</button>
       <div class="vt">${esc(doc.number ? doc.number + ' – ' : '')}${esc(doc.title)}</div>
       <span class="pg" id="vPg">…</span>
-      <button class="iconbtn" type="button" data-act="vz" data-z="-1" aria-label="Pomniejsz">${ICON.minus}</button>
-      <button class="iconbtn" type="button" data-act="vz" data-z="1" aria-label="Powiększ">${ICON.plus}</button>
-    </div></div><div id="vscroll"><div class="vpages" id="vPages"><p class="note">Wczytywanie dokumentu…</p></div></div>`;
+      <button class="iconbtn" type="button" data-act="vs-toggle" aria-label="Szukaj w dokumencie">${ICON.search}</button>
+    </div></div>
+    <div class="vsearch gut" id="vSearch" hidden><div class="inner">
+      <form class="vs-row" id="vsForm" role="search">
+        <input id="vq" type="search" placeholder="Szukaj w dokumencie…" autocomplete="off" aria-label="Szukaj w dokumencie" enterkeyhint="search">
+        <span class="vs-count" id="vsCount" aria-live="polite"></span>
+        <button class="iconbtn" type="button" data-act="vs-prev" aria-label="Poprzedni wynik">${ICON.back.replace('<svg', '<svg style="transform:rotate(90deg)"')}</button>
+        <button class="iconbtn" type="button" data-act="vs-next" aria-label="Następny wynik">${ICON.back.replace('<svg', '<svg style="transform:rotate(-90deg)"')}</button>
+        <button class="iconbtn" type="button" data-act="vs-list" aria-label="Lista wyników" aria-pressed="true">☰</button>
+      </form>
+      <div class="vs-results" id="vsResults" hidden></div>
+    </div></div>
+    <div class="vhint gut" id="vHint" hidden><div class="inner">Przeciągnij palcem po fragmencie, który chcesz zapisać, albo dotknij strony, aby zapisać ją całą.</div></div>
+    <div id="vscroll"><div class="vpages" id="vPages"><p class="note">Wczytywanie dokumentu…</p></div></div>
+    <button class="btn vmark" type="button" data-act="vm-toggle" id="vMarkBtn" hidden>${ICON.edit}<span>Zaznacz fragment</span></button>
+    <div class="vzoom"><button class="iconbtn" type="button" data-act="vz" data-z="1" aria-label="Powiększ">${ICON.plus}</button><button class="iconbtn" type="button" data-act="vz" data-z="-1" aria-label="Pomniejsz">${ICON.minus}</button></div>`;
+  v.classList.remove('marking');
   v.hidden = false; document.body.classList.add('locked'); pushHistory({ overlay: 'viewer' });
   const token = ++VW.token;
+  VW.text = null; VW.matches = []; VW.cur = -1; VW.q = ''; VW.docId = doc.id; VW.focus = focusId; VW.marking = false;
+  const qEl = $('#vq');
+  let deb;
+  qEl.addEventListener('input', () => { clearTimeout(deb); deb = setTimeout(() => runViewerSearch(qEl.value), 350); });
+  $('#vsForm').onsubmit = (e) => { e.preventDefault(); clearTimeout(deb); if (qEl.value.trim() !== VW.q) runViewerSearch(qEl.value); else vsGo(VW.cur + 1); qEl.blur(); };
   try {
     const pdfjsLib = await ensurePdfJs();
     const buf = await (await fetch(blobUrl(doc.asset))).arrayBuffer();
@@ -1093,16 +1163,183 @@ async function openViewer(doc, page = 1) {
     VW.pdf = pdf; VW.zoom = 1; VW.rendered = new Map();
     const p1 = await pdf.getPage(1); const vp = p1.getViewport({ scale: 1 }); VW.ratio = vp.height / vp.width;
     const pages = $('#vPages'); let html = '';
-    for (let i = 1; i <= pdf.numPages; i++) html += `<div class="vpage" data-p="${i}"><span class="n">${i}</span></div>`;
+    for (let i = 1; i <= pdf.numPages; i++) html += `<div class="vpage" data-p="${i}"><span class="n">${i}</span><div class="hlayer"></div></div>`;
     pages.innerHTML = html; layoutViewer();
     VW.obs = new IntersectionObserver((ents) => { for (const e of ents) if (e.isIntersecting) renderVPage(+e.target.dataset.p); }, { root: $('#vscroll'), rootMargin: '800px 0px' });
     pages.querySelectorAll('.vpage').forEach((el) => VW.obs.observe(el));
     const target = pages.querySelector(`[data-p="${Math.min(Math.max(1, page), pdf.numPages)}"]`);
     if (target) $('#vscroll').scrollTop = target.offsetTop - 8;
     $('#vscroll').onscroll = updateVPg; updateVPg();
+    $('#vMarkBtn').hidden = false;
+    bindMarking(token);
+    if (query) { toggleViewerSearch(true); qEl.value = query; runViewerSearch(query); }
+    if (focusId) focusMark(focusId);
   } catch (e) {
     $('#vPages').innerHTML = '<p class="note warn">Nie udało się otworzyć pliku PDF.</p>';
   }
+}
+function toggleViewerSearch(force) {
+  const box = $('#vSearch'); if (!box) return;
+  const show = force != null ? force : box.hidden;
+  box.hidden = !show;
+  if (show) setTimeout(() => $('#vq').focus(), 50);
+  else { VW.matches = []; VW.cur = -1; VW.q = ''; $('#vq').value = ''; $('#vsCount').textContent = ''; $('#vsResults').hidden = true; refreshHighlights(); }
+}
+// Extract text of every page once (cached for the open document).
+async function loadViewerText(token) {
+  if (VW.text) return VW.text;
+  const out = [];
+  for (let i = 1; i <= VW.pdf.numPages; i++) {
+    if (token !== VW.token) return null;
+    if (i % 5 === 1) $('#vsCount').textContent = `Indeksowanie… ${Math.round((i - 1) / VW.pdf.numPages * 100)}%`;
+    const page = await VW.pdf.getPage(i); const tc = await page.getTextContent();
+    const items = tc.items.filter((it) => typeof it.str === 'string');
+    // Joined page text with a map from each folded character back to (item, char).
+    let folded = '', raw = ''; const map = [];
+    items.forEach((it, ii) => {
+      for (let ci = 0; ci < it.str.length; ci++) { const f = fold(it.str[ci]) || ' '; folded += f[0]; raw += it.str[ci]; map.push([ii, ci]); }
+      folded += ' '; raw += ' '; map.push([ii, it.str.length]);
+    });
+    out.push({ items, folded: folded.replace(/\s+/g, (m) => ' '.repeat(m.length)), raw, map });
+  }
+  VW.text = out; return out;
+}
+async function runViewerSearch(q) {
+  const token = VW.token; q = q.trim(); VW.q = q;
+  const count = $('#vsCount'), list = $('#vsResults');
+  if (!VW.pdf) return;
+  if (q.length < 2) { VW.matches = []; VW.cur = -1; count.textContent = ''; list.hidden = true; refreshHighlights(); return; }
+  const text = await loadViewerText(token); if (!text || token !== VW.token || VW.q !== q) return;
+  if (!text.some((t) => t.items.length)) { count.textContent = ''; list.hidden = false; list.innerHTML = '<p class="note" style="margin:8px 0">Ten PDF nie zawiera tekstu (np. skan), więc nie da się w nim wyszukiwać.</p>'; return; }
+  const needle = fold(q).replace(/\s+/g, ' ');
+  const matches = [];
+  text.forEach((t, pi) => {
+    let i = t.folded.indexOf(needle);
+    while (i >= 0 && matches.length < 2000) { matches.push({ page: pi + 1, start: i, end: i + needle.length }); i = t.folded.indexOf(needle, i + needle.length); }
+  });
+  VW.matches = matches;
+  if (!matches.length) { VW.cur = -1; count.textContent = '0 wyników'; list.hidden = false; list.innerHTML = `<p class="note" style="margin:8px 0">Brak „${esc(q)}” w tym dokumencie.</p>`; refreshHighlights(); return; }
+  list.innerHTML = matches.slice(0, 200).map((m, k) => {
+    const raw = text[m.page - 1].raw; const a = Math.max(0, m.start - 45), b = Math.min(raw.length, m.end + 60);
+    return `<button class="vs-res" type="button" data-act="vs-go" data-k="${k}"><span class="pgn">s. ${m.page}</span>${a > 0 ? '…' : ''}${esc(raw.slice(a, m.start))}<mark>${esc(raw.slice(m.start, m.end))}</mark>${esc(raw.slice(m.end, b))}${b < raw.length ? '…' : ''}</button>`;
+  }).join('') + (matches.length > 200 ? `<p class="note" style="margin:8px 0">Pokazano 200 z ${matches.length} wyników. Użyj strzałek, aby przejść dalej.</p>` : '');
+  list.hidden = false; $('[data-act="vs-list"]').setAttribute('aria-pressed', 'true');
+  // Start from the first match at or after the page being viewed.
+  const curPage = parseInt(($('#vPg').textContent || '1'), 10) || 1;
+  const first = Math.max(0, matches.findIndex((m) => m.page >= curPage));
+  vsGo(first, true);
+}
+function vsGo(k, keepList) {
+  const n = VW.matches.length; if (!n) return;
+  VW.cur = ((k % n) + n) % n; const m = VW.matches[VW.cur];
+  $('#vsCount').textContent = `${VW.cur + 1} / ${n}`;
+  document.querySelectorAll('#vsResults .vs-res').forEach((b) => b.setAttribute('aria-current', String(+b.dataset.k === VW.cur)));
+  if (!keepList) { $('#vsResults').hidden = true; $('[data-act="vs-list"]').setAttribute('aria-pressed', 'false'); }
+  const el = $(`#vPages [data-p="${m.page}"]`); const sc = $('#vscroll'); if (!el) return;
+  refreshHighlights();
+  renderVPage(m.page).then(() => {
+    const cur = el.querySelector('.hl.cur');
+    const off = cur ? cur.offsetTop : 0;
+    sc.scrollTop = el.offsetTop + off - sc.clientHeight / 3;
+  });
+}
+// Draw highlight boxes for all matches on rendered pages (current match stronger).
+function refreshHighlights() {
+  document.querySelectorAll('#vPages .vpage').forEach((el) => drawPageHighlights(+el.dataset.p));
+}
+function drawPageHighlights(n) {
+  const el = $(`#vPages [data-p="${n}"]`); if (!el) return; const layer = el.querySelector('.hlayer'); if (!layer) return;
+  let html = chapterMarksHtml(n);
+  const ms = VW.matches.filter((m) => m.page === n);
+  if (!ms.length || !VW.text || !el.dataset.vt) { layer.innerHTML = html; return; }
+  const t = VW.text[n - 1]; const k = +el.dataset.vs; const T = JSON.parse(el.dataset.vt); // k: PDF units -> CSS px
+  for (const m of ms) {
+    const isCur = VW.matches[VW.cur] === m;
+    // Group the match characters by text item.
+    const segs = new Map();
+    for (let i = m.start; i < m.end; i++) { const [ii, ci] = t.map[i]; const it = t.items[ii]; if (!it || ci >= it.str.length) continue; const s = segs.get(ii) || [ci, ci + 1]; s[0] = Math.min(s[0], ci); s[1] = Math.max(s[1], ci + 1); segs.set(ii, s); }
+    for (const [ii, [s, e]] of segs) {
+      const it = t.items[ii]; const tr = window.pdfjsLib.Util.transform(T, it.transform);
+      const fh = Math.hypot(tr[2], tr[3]); const w = it.width * k; const len = it.str.length || 1;
+      const left = tr[4] + w * (s / len), width = Math.max(4, w * ((e - s) / len));
+      html += `<div class="hl${isCur ? ' cur' : ''}" style="left:${left - 1}px;top:${tr[5] - fh - 1}px;width:${width + 2}px;height:${fh * 1.2 + 2}px"></div>`;
+    }
+  }
+  layer.innerHTML = html;
+}
+// Saved notes ("zapisy") of this document drawn on their pages.
+function chapterMarksHtml(n) {
+  const d = S.docs.find((x) => x.id === VW.docId); if (!d) return '';
+  return (d.chapters || []).filter((c) => +c.page === n).map((c) => {
+    const label = esc([c.no, c.title].filter(Boolean).join(' ') || 'Zapis');
+    if (!c.rect) return `<div class="mk-page"><span>★ ${label}</span></div>`;
+    const r = c.rect;
+    return `<div class="mk${VW.focus === c.id ? ' focus' : ''}" style="left:${r.x * 100}%;top:${r.y * 100}%;width:${r.w * 100}%;height:${r.h * 100}%"><span>${label}</span></div>`;
+  }).join('');
+}
+function focusMark(id) {
+  const d = S.docs.find((x) => x.id === VW.docId); const c = d && (d.chapters || []).find((x) => x.id === id); if (!c) return;
+  VW.focus = id; const n = parseInt(c.page, 10) || 1;
+  const el = $(`#vPages [data-p="${n}"]`); const sc = $('#vscroll'); if (!el || !sc) return;
+  sc.scrollTop = el.offsetTop + (c.rect ? c.rect.y * el.clientHeight : 0) - 70;
+  renderVPage(n).then(refreshHighlights);
+}
+function toggleMarking(force) {
+  VW.marking = force != null ? force : !VW.marking;
+  const v = $('#viewer'); v.classList.toggle('marking', VW.marking);
+  $('#vHint').hidden = !VW.marking;
+  $('#vMarkBtn span').textContent = VW.marking ? 'Anuluj zaznaczanie' : 'Zaznacz fragment';
+}
+// Drag a rectangle on a page (or tap for the whole page) while marking.
+function bindMarking(token) {
+  const pagesEl = $('#vPages'); let sel = null;
+  const pos = (e) => ({ x: Math.min(Math.max(0, e.clientX - sel.r.left), sel.r.width), y: Math.min(Math.max(0, e.clientY - sel.r.top), sel.r.height) });
+  const draw = () => {
+    const x = Math.min(sel.a.x, sel.b.x), y = Math.min(sel.a.y, sel.b.y), w = Math.abs(sel.b.x - sel.a.x), h = Math.abs(sel.b.y - sel.a.y);
+    Object.assign(sel.box.style, { left: x + 'px', top: y + 'px', width: w + 'px', height: h + 'px' });
+  };
+  pagesEl.addEventListener('pointerdown', (e) => {
+    if (!VW.marking || token !== VW.token) return;
+    const pageEl = e.target.closest('.vpage'); if (!pageEl) return;
+    e.preventDefault(); try { pageEl.setPointerCapture(e.pointerId); } catch (err) {}
+    const box = document.createElement('div'); box.className = 'selbox'; pageEl.appendChild(box);
+    sel = { pageEl, r: pageEl.getBoundingClientRect(), box, id: e.pointerId };
+    sel.a = pos(e); sel.b = { ...sel.a }; draw();
+  });
+  pagesEl.addEventListener('pointermove', (e) => { if (!sel || e.pointerId !== sel.id) return; sel.b = pos(e); draw(); });
+  const end = async (e) => {
+    if (!sel || e.pointerId !== sel.id) return;
+    const s0 = sel; sel = null; s0.box.remove();
+    if (e.type === 'pointercancel') return;
+    const W = s0.r.width, H = s0.r.height;
+    const x = Math.min(s0.a.x, s0.b.x), y = Math.min(s0.a.y, s0.b.y), w = Math.abs(s0.b.x - s0.a.x), h = Math.abs(s0.b.y - s0.a.y);
+    const n = +s0.pageEl.dataset.p;
+    const rect = (w < 14 && h < 14) ? null : { x: x / W, y: y / H, w: w / W, h: h / H };
+    toggleMarking(false);
+    const quote = rect ? await quoteFromRect(n, rect) : '';
+    const doc = S.docs.find((d) => d.id === VW.docId); if (!doc) return;
+    openChapterForm(doc, null, { page: n, rect, quote });
+  };
+  pagesEl.addEventListener('pointerup', end); pagesEl.addEventListener('pointercancel', end);
+}
+// Text of the PDF items whose centre lies inside the selected rectangle.
+async function quoteFromRect(n, rect) {
+  try {
+    const text = await loadViewerText(VW.token); if (!text) return '';
+    const el = $(`#vPages [data-p="${n}"]`); if (!el || !el.dataset.vt) return '';
+    const t = text[n - 1]; const k = +el.dataset.vs; const T = JSON.parse(el.dataset.vt);
+    const W = +el.dataset.vw, H = W * (+el.dataset.r || VW.ratio);
+    const rx = rect.x * W, ry = rect.y * H, rw = rect.w * W, rh = rect.h * H;
+    const parts = [];
+    for (const it of t.items) {
+      if (!it.str.trim()) { if (it.hasEOL && parts.length) parts.push('\n'); continue; }
+      const tr = window.pdfjsLib.Util.transform(T, it.transform); const fh = Math.hypot(tr[2], tr[3]);
+      const cx = tr[4] + (it.width * k) / 2, cy = tr[5] - fh / 2;
+      if (cx >= rx && cx <= rx + rw && cy >= ry && cy <= ry + rh) parts.push(it.str + (it.hasEOL ? '\n' : ' '));
+    }
+    if ($('#vsCount') && !VW.q) $('#vsCount').textContent = '';
+    return parts.join('').replace(/[ \t]+/g, ' ').replace(/\s*\n\s*/g, '\n').trim().slice(0, 1500);
+  } catch (e) { return ''; }
 }
 function layoutViewer() {
   const sc = $('#vscroll'); if (!sc) return;
@@ -1111,9 +1348,15 @@ function layoutViewer() {
 }
 async function renderVPage(n) {
   const el = $(`#vPages [data-p="${n}"]`); if (!el || !VW.pdf) return;
-  const key = n + '@' + VW.zoom; if (VW.rendered.get(n) === key) return; VW.rendered.set(n, key);
+  const key = n + '@' + VW.zoom;
+  if (VW.rendered.get(n) === key) { drawPageHighlights(n); return; }
+  VW.rendered.set(n, key);
   const page = await VW.pdf.getPage(n); const v1 = page.getViewport({ scale: 1 });
   el.dataset.r = v1.height / v1.width; el.style.height = el.clientWidth * el.dataset.r + 'px';
+  // CSS-pixel viewport transform for placing search highlights.
+  const cssVp = page.getViewport({ scale: el.clientWidth / v1.width });
+  el.dataset.vw = el.clientWidth; el.dataset.vs = cssVp.scale; el.dataset.vt = JSON.stringify(cssVp.transform);
+  drawPageHighlights(n);
   const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
   const vp = page.getViewport({ scale: (el.clientWidth * dpr) / v1.width });
   const c = document.createElement('canvas'); c.width = Math.round(vp.width); c.height = Math.round(vp.height);
@@ -1135,7 +1378,7 @@ function zoomViewer(dir) {
 }
 function closeViewer(fromPop) {
   const v = $('#viewer'); if (v.hidden) return;
-  VW.token++; if (VW.obs) VW.obs.disconnect(); if (VW.pdf) { try { VW.pdf.destroy(); } catch (e) {} } VW.pdf = null;
+  VW.token++; if (VW.obs) VW.obs.disconnect(); if (VW.pdf) { try { VW.pdf.destroy(); } catch (e) {} } VW.pdf = null; VW.text = null; VW.matches = [];
   v.hidden = true; v.innerHTML = ''; document.body.classList.remove('locked');
   if (!fromPop) backQuiet();
 }
@@ -1859,8 +2102,15 @@ document.addEventListener('click', (e) => {
     case 'pdf-open': openViewer(S.docs.find((d) => d.id === id), 1); break;
     case 'ch-new': openChapterForm(S.docs.find((d) => d.id === id), null); break;
     case 'ch-open': openChapterForm(S.docs.find((d) => d.id === id), el.dataset.ch); break;
+    case 'ch-go': { const d = S.docs.find((x) => x.id === id); const c = d && (d.chapters || []).find((x) => x.id === el.dataset.ch); if (c) goToChapter(d, c); break; }
+    case 'vm-toggle': toggleMarking(); break;
     case 'viewer-close': closeViewer(); break;
     case 'vz': zoomViewer(+el.dataset.z); break;
+    case 'vs-toggle': toggleViewerSearch(); break;
+    case 'vs-next': vsGo(VW.cur + 1); break;
+    case 'vs-prev': vsGo(VW.cur - 1); break;
+    case 'vs-go': vsGo(+el.dataset.k); break;
+    case 'vs-list': { const l = $('#vsResults'); if (!VW.matches.length && l.hidden && !l.innerHTML) break; l.hidden = !l.hidden; el.setAttribute('aria-pressed', String(!l.hidden)); break; }
     case 'proj-new': openProjectForm(null); break;
     case 'proj-open': navigate({ name: 'project', id }); break;
     case 'proj-edit': openProjectForm(curProject()); break;
@@ -1877,6 +2127,11 @@ document.addEventListener('click', (e) => {
     case 'settings': openSettings(); break;
     case 'backup-now': createBackup(); break;
   }
+});
+document.addEventListener('submit', (e) => {
+  if (e.target.id !== 'docSearch') return;
+  e.preventDefault(); const inp = $('#docQ'); const d = S.docs.find((x) => x.id === inp.dataset.id);
+  if (d && inp.value.trim()) openViewer(d, 1, inp.value.trim());
 });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { if (!$('#sheet').hidden) closeSheet(); else if (!$('#viewer').hidden) closeViewer(); } });
 

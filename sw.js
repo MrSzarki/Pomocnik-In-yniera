@@ -1,6 +1,6 @@
 // Pomocnik Inżyniera — service worker: offline app shell + cached web fonts.
 // Bump VERSION whenever any app file changes so phones pick up the update.
-const VERSION = 'pi-v1.0.0';
+const VERSION = 'pi-v1.2.0';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './pdf.js', './pdf.worker.js'];
 const FONT_CACHE = 'pi-fonts';
 
