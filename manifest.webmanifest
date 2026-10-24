@@ -1,0 +1,17 @@
+{
+  "name": "Pomocnik Inżyniera",
+  "short_name": "Pomocnik",
+  "description": "Biblioteka norm i aktów prawnych oraz odbiory mieszkań z raportem PDF.",
+  "lang": "pl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#eef1f0",
+  "theme_color": "#17222b",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

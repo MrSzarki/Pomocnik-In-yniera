@@ -1,0 +1,1892 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pomocnik Inżyniera</title>
+<meta name="description" content="Biblioteka norm i aktów prawnych oraz odbiory mieszkań z usterkami na rzutach i raportem PDF.">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#172129" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+body { margin: 0; } img { max-width: 100%; } [hidden] { display: none !important; }
+/* Layout: phone-first app shell — sticky title bar, scrolling content, fixed bottom tab bar; drawing-sheet details (title blocks, mono designations). */
+:root {
+  --paper: #eef1f0;
+  --surface: #ffffff;
+  --surface-2: #f6f8f7;
+  --ink: #17222b;
+  --muted: #5b6a72;
+  --line: #d2dadb;
+  --accent: #e5a019;
+  --accent-ink: #2b1c00;
+  --blue: #1d5d8a;
+  --blue-soft: #e3eef6;
+  --danger: #c23f2c;
+  --danger-soft: #fbe9e6;
+  --ok: #2d8653;
+  --ok-soft: #e4f3ea;
+  --shadow: 0 1px 2px rgba(23,34,43,.08), 0 6px 20px rgba(23,34,43,.08);
+  --display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --body: "Barlow", "Segoe UI", Roboto, system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --tabh: 62px;
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #10171c; --surface: #172129; --surface-2: #1c2831; --ink: #e5ecee; --muted: #94a4ac;
+    --line: #2a3943; --accent: #f0b33a; --accent-ink: #241700; --blue: #72b4e2; --blue-soft: #18303f;
+    --danger: #ee6c58; --danger-soft: #3a1f1b; --ok: #5cc489; --ok-soft: #173326;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.3);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #10171c; --surface: #172129; --surface-2: #1c2831; --ink: #e5ecee; --muted: #94a4ac;
+  --line: #2a3943; --accent: #f0b33a; --accent-ink: #241700; --blue: #72b4e2; --blue-soft: #18303f;
+  --danger: #ee6c58; --danger-soft: #3a1f1b; --ok: #5cc489; --ok-soft: #173326;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.3);
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body { background: var(--paper); color: var(--ink); font: 16px/1.45 var(--body); -webkit-tap-highlight-color: transparent; }
+body.locked { overflow: hidden; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
+* { box-sizing: border-box; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+a { color: var(--blue); }
+
+.gut { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.inner { max-width: 880px; margin: 0 auto; }
+#main { padding-bottom: calc(var(--tabh) + env(safe-area-inset-bottom, 0px) + 24px); }
+
+/* Top bar */
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line); }
+.bar .inner { display: flex; align-items: center; gap: 10px; min-height: 58px; padding-block: 8px; }
+.bar h1 { font: 700 24px/1.05 var(--display); letter-spacing: .01em; margin: 0; text-wrap: balance; }
+.bar .sub { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.bar .grow { flex: 1; min-width: 0; }
+.bar .grow > * { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mark { width: 34px; height: 34px; flex: none; border-radius: 8px; background: var(--ink); color: var(--paper); display: grid; place-items: center; font: 700 15px var(--mono); }
+
+.iconbtn { width: 42px; height: 42px; flex: none; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; }
+.iconbtn svg { width: 22px; height: 22px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); font-weight: 600; text-decoration: none; color: var(--ink); white-space: nowrap; }
+.btn svg { width: 20px; height: 20px; flex: none; }
+.btn.primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.btn.accent { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn.danger { color: var(--danger); border-color: var(--danger); background: transparent; }
+.btn.ghost { border-color: transparent; background: transparent; }
+.btn.sm { min-height: 36px; padding: 0 12px; font-size: 14px; }
+.btn[disabled] { opacity: .5; pointer-events: none; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+/* Search */
+.search { position: relative; margin-block: 14px 6px; }
+.search input { width: 100%; height: 48px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); padding: 0 44px 0 44px; font-size: 16px; }
+.search svg { position: absolute; left: 13px; top: 13px; width: 22px; height: 22px; color: var(--muted); }
+.search .clear { position: absolute; right: 4px; top: 4px; border: 0; background: none; width: 40px; height: 40px; color: var(--muted); font-size: 22px; }
+
+.crumbs { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; font-size: 14px; color: var(--muted); margin: 12px 0 6px; }
+.crumbs button { border: 0; background: none; padding: 4px 2px; color: var(--blue); font-weight: 600; }
+.crumbs .cur { color: var(--ink); font-weight: 600; }
+
+.label { font: 600 12px var(--body); letter-spacing: .09em; text-transform: uppercase; color: var(--muted); margin: 20px 0 8px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+
+.list { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--surface); border: 0; text-align: left; width: 100%; min-height: 60px; }
+.item:active { background: var(--surface-2); }
+.item .body { flex: 1; min-width: 0; }
+.item .t { font-weight: 600; line-height: 1.25; }
+.item .m { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.item .chev { color: var(--muted); flex: none; }
+.folder { width: 38px; height: 38px; border-radius: 9px; background: var(--blue-soft); color: var(--blue); display: grid; place-items: center; flex: none; }
+.folder svg { width: 22px; height: 22px; }
+.count { font: 500 13px var(--mono); color: var(--muted); }
+
+.type { flex: none; font: 700 10.5px var(--mono); letter-spacing: .05em; padding: 4px 6px; border-radius: 5px; border: 1.5px solid currentColor; min-width: 54px; text-align: center; }
+.type.NORMA { color: var(--blue); }
+.type.AKT { color: var(--ok); }
+.type.WT { color: var(--accent); }
+.type.ZESZYT { color: var(--danger); }
+.type.INNE { color: var(--muted); }
+.desig { font: 600 13.5px var(--mono); color: var(--ink); }
+mark { background: color-mix(in srgb, var(--accent) 35%, transparent); color: inherit; border-radius: 3px; padding: 0 1px; }
+.hits { margin: 6px 0 0; padding: 0; list-style: none; display: grid; gap: 2px; }
+.hits li { font-size: 13.5px; color: var(--muted); }
+
+.empty { text-align: center; padding: 34px 20px; border: 1.5px dashed var(--line); border-radius: var(--r); color: var(--muted); background: var(--surface); }
+.empty h3 { font: 600 20px var(--display); color: var(--ink); margin: 0 0 6px; }
+.empty p { margin: 0 auto 16px; max-width: 42ch; }
+.note { font-size: 14px; color: var(--muted); padding: 12px 14px; border-radius: var(--r); background: var(--surface-2); border: 1px solid var(--line); }
+.note.warn { background: var(--danger-soft); border-color: transparent; color: var(--ink); }
+
+/* Doc detail: drawing title block */
+.titleblock { margin-top: 16px; border: 1.5px solid var(--ink); border-radius: 4px; background: var(--surface); display: grid; grid-template-columns: 1fr auto; }
+.titleblock > div { padding: 10px 14px; min-width: 0; }
+.titleblock .cell-l { border-right: 1.5px solid var(--ink); }
+.titleblock .k { font: 600 10.5px var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.titleblock .v { font-weight: 600; }
+.titleblock .big { grid-column: 1 / -1; border-top: 1.5px solid var(--ink); }
+.titleblock h2 { font: 700 26px/1.12 var(--display); margin: 2px 0 0; text-wrap: balance; }
+.titleblock .num { font: 700 17px var(--mono); margin-top: 2px; overflow-wrap: anywhere; }
+.prose { white-space: pre-wrap; overflow-wrap: anywhere; }
+.chap .no { font: 700 13px var(--mono); color: var(--blue); flex: none; min-width: 42px; }
+.chap .pg { font: 500 12px var(--mono); color: var(--muted); flex: none; }
+
+/* Tab bar */
+.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; background: var(--surface); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.tabs .inner { display: grid; grid-template-columns: 1fr 1fr; height: var(--tabh); }
+.tabs button { border: 0; background: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 13px; font-weight: 600; color: var(--muted); position: relative; }
+.tabs button svg { width: 24px; height: 24px; }
+.tabs button[aria-current="page"] { color: var(--ink); }
+.tabs button[aria-current="page"]::before { content: ""; position: absolute; top: 0; left: 30%; right: 30%; height: 3px; border-radius: 0 0 3px 3px; background: var(--accent); }
+
+/* Projects */
+.pcards { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); }
+.pcard { text-align: left; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); padding: 14px; display: grid; gap: 10px; box-shadow: var(--shadow); }
+.pcard h3 { margin: 0; font: 700 21px/1.1 var(--display); }
+.pcard .m { font-size: 13.5px; color: var(--muted); }
+.stats { display: flex; gap: 8px; flex-wrap: wrap; }
+.pill { font: 600 12.5px var(--body); padding: 3px 9px; border-radius: 99px; background: var(--surface-2); border: 1px solid var(--line); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pill.open { background: color-mix(in srgb, var(--accent) 22%, var(--surface)); border-color: transparent; color: var(--ink); }
+.pill.done { background: var(--ok-soft); border-color: transparent; color: var(--ok); }
+
+/* Plan viewer */
+.plantabs { display: flex; gap: 8px; overflow-x: auto; padding-block: 10px; scrollbar-width: none; }
+.plantabs::-webkit-scrollbar { display: none; }
+.chip { flex: none; border: 1px solid var(--line); background: var(--surface); border-radius: 99px; padding: 0 14px; height: 38px; font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.chip.add { border-style: dashed; color: var(--blue); }
+.stagewrap { position: relative; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; background: var(--surface-2); height: 58vh; height: 58svh; min-height: 300px; max-height: 720px; }
+.stage { position: absolute; inset: 0; touch-action: none; overflow: hidden; cursor: grab; user-select: none; -webkit-user-select: none;
+  background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 24px 24px; background-position: -1px -1px; }
+.stagewrap.adding .stage { cursor: crosshair; }
+.world { position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform; }
+.world img { display: block; width: 100%; height: 100%; max-width: none; pointer-events: none; background: #fff; box-shadow: 0 0 0 1px var(--line); }
+.pin { position: absolute; width: 0; height: 0; }
+.pin > span { position: absolute; left: -16px; top: -40px; width: 32px; height: 40px; transform: scale(var(--inv, 1)); transform-origin: 50% 100%; display: grid; justify-items: center; }
+.pin b { width: 32px; height: 32px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); background: var(--accent); border: 2px solid #1b1b1b; display: grid; place-items: center; box-shadow: 0 2px 6px rgba(0,0,0,.35); }
+.pin i { transform: rotate(45deg); font: 700 13px var(--mono); font-style: normal; color: #1b1b1b; }
+.pin.done b { background: #3fae6c; }
+.pin.ghost b { background: #fff; border-style: dashed; }
+.pin.sel b { outline: 3px solid var(--blue); outline-offset: 2px; }
+.tools { position: absolute; right: max(10px, env(safe-area-inset-right, 0px)); top: 10px; display: grid; gap: 8px; }
+.tools .iconbtn { box-shadow: var(--shadow); }
+.addfab { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); box-shadow: var(--shadow); }
+.stagewrap.adding .addfab { background: var(--blue); border-color: var(--blue); color: #fff; }
+.hint { position: absolute; left: 10px; top: 10px; right: 64px; font-size: 13.5px; font-weight: 600; background: var(--blue); color: #fff; padding: 8px 12px; border-radius: 8px; box-shadow: var(--shadow); }
+.stage-empty { position: absolute; inset: 0; display: grid; place-items: center; padding: 20px; text-align: center; }
+.stage-empty > div { max-width: 340px; }
+.stage-empty h3 { font: 700 21px var(--display); margin: 0 0 6px; }
+.stage-empty p { color: var(--muted); margin: 0 0 14px; }
+
+.drow { display: flex; gap: 12px; align-items: center; padding: 10px 14px; background: var(--surface); border: 0; width: 100%; text-align: left; min-height: 64px; }
+.dnum { flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font: 700 13px var(--mono); background: var(--accent); color: #1b1b1b; border: 2px solid #1b1b1b; }
+.dnum.done { background: #3fae6c; }
+.thumb { width: 52px; height: 52px; border-radius: 8px; object-fit: cover; flex: none; background: var(--surface-2); border: 1px solid var(--line); }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.seg button { border: 0; background: var(--surface); padding: 0 12px; height: 36px; font-size: 14px; font-weight: 600; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+
+/* Sheets */
+#sheet, #confirm, #busy { position: fixed; inset: 0; z-index: 20; }
+#confirm { z-index: 30; }
+#busy { z-index: 40; display: grid; place-items: center; background: rgba(10,16,20,.55); padding: 20px; }
+.backdrop { position: absolute; inset: 0; background: rgba(10,16,20,.5); }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; max-height: 92%; overflow: auto; background: var(--surface); border-radius: 16px 16px 0 0; padding: 8px max(16px, env(safe-area-inset-right, 0px)) calc(16px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); box-shadow: 0 -10px 40px rgba(0,0,0,.25); }
+@media (min-width: 700px) { .sheet { left: 50%; right: auto; width: 640px; transform: translateX(-50%); bottom: 24px; border-radius: 16px; max-height: calc(100% - 48px); } }
+.grab { width: 44px; height: 5px; border-radius: 9px; background: var(--line); margin: 4px auto 10px; }
+.sheet h2 { font: 700 24px/1.1 var(--display); margin: 0 0 4px; }
+.sheet .lead { color: var(--muted); font-size: 14px; margin: 0 0 14px; }
+.form { display: grid; gap: 14px; }
+.field { display: grid; gap: 6px; }
+.field > span { font-size: 13px; font-weight: 600; color: var(--muted); }
+.field input, .field select, .field textarea { width: 100%; min-height: 46px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); padding: 10px 12px; font-size: 16px; }
+.field textarea { min-height: 96px; resize: vertical; }
+.two { display: grid; gap: 14px; grid-template-columns: 1fr 1fr; }
+@media (max-width: 420px) { .two { grid-template-columns: 1fr; } }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; margin-top: 6px; }
+.actions .spacer { flex: 1; }
+.photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; }
+.photo { position: relative; aspect-ratio: 1; max-width: 100%; border-radius: 8px; overflow: hidden; border: 1px solid var(--line); background: var(--surface-2); }
+.photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.photo .x { position: absolute; top: 4px; right: 4px; width: 28px; height: 28px; border-radius: 50%; border: 0; background: rgba(0,0,0,.65); color: #fff; font-size: 16px; line-height: 1; }
+.photo.loading { display: grid; place-items: center; font-size: 12px; color: var(--muted); }
+.sheet-tb { display: grid; grid-template-columns: auto 1fr; gap: 0; border: 1.5px solid var(--ink); border-radius: 4px; margin-bottom: 14px; }
+.sheet-tb > div { padding: 8px 12px; min-width: 0; }
+.sheet-tb > div:first-child { border-right: 1.5px solid var(--ink); display: grid; place-items: center; }
+.busybox { background: var(--surface); border-radius: 14px; padding: 22px 24px; max-width: 340px; width: 100%; text-align: center; box-shadow: var(--shadow); }
+.busybox p { margin: 10px 0 0; color: var(--muted); font-size: 14px; }
+.bar-prog { height: 6px; border-radius: 9px; background: var(--line); overflow: hidden; margin-top: 14px; }
+.bar-prog > i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .2s; }
+
+/* PDF viewer */
+#viewer { position: fixed; inset: 0; z-index: 15; background: var(--paper); display: flex; flex-direction: column; padding-top: env(safe-area-inset-top, 0px); }
+#viewer .vbar { background: var(--surface); border-bottom: 1px solid var(--line); }
+#viewer .vbar .inner { display: flex; gap: 8px; align-items: center; min-height: 56px; padding-block: 6px; }
+#viewer .vt { flex: 1; min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#viewer .pg { font: 500 13px var(--mono); color: var(--muted); white-space: nowrap; }
+#vscroll { flex: 1; overflow: auto; padding: 12px 0 calc(24px + env(safe-area-inset-bottom, 0px)); -webkit-overflow-scrolling: touch; }
+.vpages { display: grid; gap: 12px; justify-items: center; padding-left: max(12px, env(safe-area-inset-left, 0px)); padding-right: max(12px, env(safe-area-inset-right, 0px)); }
+.vpage { background: #fff; box-shadow: var(--shadow); position: relative; }
+.vpage canvas { display: block; width: 100%; height: 100%; }
+.vpage .n { position: absolute; left: -2px; top: -2px; font: 600 11px var(--mono); background: var(--ink); color: var(--paper); padding: 2px 6px; border-radius: 0 0 6px 0; }
+
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(var(--tabh) + env(safe-area-inset-bottom, 0px) + 16px); z-index: 50; background: var(--ink); color: var(--paper); padding: 11px 16px; border-radius: 10px; font-size: 14.5px; font-weight: 600; box-shadow: var(--shadow); max-width: calc(100% - 32px); }
+.skel { height: 60px; border-radius: var(--r); background: var(--surface); border: 1px solid var(--line); }
+@media (prefers-reduced-motion: no-preference) { .skel { animation: pulse 1.2s ease-in-out infinite; } }
+@keyframes pulse { 50% { opacity: .55; } }
+/* Quick phrases */
+.phrases { display: flex; flex-wrap: wrap; gap: 6px; }
+.phr { border: 1px solid var(--line); background: var(--surface-2); border-radius: 99px; min-height: 34px; padding: 0 12px; font-size: 14px; display: inline-flex; gap: 8px; align-items: center; color: var(--ink); }
+.phr-own { display: inline-flex; align-items: center; border: 1px solid var(--blue); color: var(--blue); border-radius: 99px; background: var(--blue-soft); }
+.phr-own .phr { border: 0; background: none; color: inherit; padding-right: 4px; }
+.phr-own .rm { border: 0; background: none; color: inherit; width: 30px; height: 34px; font-size: 18px; line-height: 1; }
+.photo .ann { position: absolute; inset: 0; border: 0; padding: 0; background: none; }
+.photo .pen { position: absolute; left: 4px; bottom: 4px; font: 600 11px var(--body); background: rgba(0,0,0,.65); color: #fff; padding: 2px 6px; border-radius: 5px; pointer-events: none; }
+/* Photo annotator: deliberately one dark look regardless of theme, like a camera app */
+#annot { position: fixed; inset: 0; z-index: 25; background: #0d1216; color: #e8eef0; display: flex; flex-direction: column; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); color-scheme: dark; }
+#annot .abar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px max(12px, env(safe-area-inset-right, 0px)) 10px max(12px, env(safe-area-inset-left, 0px)); }
+#annot .abar .sp { flex: 1; }
+#annot .acv { flex: 1; min-height: 0; display: grid; place-items: center; padding: 6px; }
+#annot canvas { max-width: 100%; max-height: 100%; touch-action: none; background: #fff; display: block; }
+.abtn { min-height: 42px; padding: 0 14px; border-radius: 10px; border: 1px solid #33434d; background: #1a242b; color: #e8eef0; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+.abtn[aria-pressed="true"] { background: #e5a019; border-color: #e5a019; color: #1b1b1b; }
+.abtn.save { background: #e8eef0; color: #0d1216; border-color: #e8eef0; }
+.sw { width: 34px; height: 34px; border-radius: 50%; border: 2px solid #33434d; }
+.sw[aria-pressed="true"] { outline: 3px solid #e8eef0; outline-offset: 2px; }
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="main"></div>
+  <nav class="tabs gut" aria-label="Sekcje">
+    <div class="inner">
+      <button type="button" data-act="tab" data-tab="lib" id="tab-lib">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h4v16H4zM10 4h4v16h-4zM16.5 4.6l3.8-1 3.2 15.5-3.8.9z" transform="translate(-1 0)"/></svg>
+        Biblioteka
+      </button>
+      <button type="button" data-act="tab" data-tab="projects" id="tab-projects">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18v16H3zM3 11h8M11 4v16M15 14h6"/><circle cx="16" cy="8" r="1.6"/></svg>
+        Odbiory
+      </button>
+    </div>
+  </nav>
+</div>
+<div id="viewer" hidden></div>
+<div id="sheet" hidden></div>
+<div id="confirm" hidden></div>
+<div id="busy" hidden><div class="busybox"><strong id="busyT">Proszę czekać…</strong><p id="busyP"></p><div class="bar-prog"><i id="busyBar"></i></div></div></div>
+<input type="file" id="fileCam" accept="image/*" capture="environment" class="vh" tabindex="-1">
+<input type="file" id="fileGal" accept="image/*" multiple class="vh" tabindex="-1">
+
+<script>
+'use strict';
+/* =====================================================================
+   Pomocnik Inżyniera — standalone offline web app (PWA)
+   Two modules: Library (standards / legal acts) and Apartment inspection
+   (defects pinned on floor plans + PDF report).
+   Storage: IndexedDB on the device (records + PDFs/photos). Backup as ZIP.
+   ===================================================================== */
+
+// ---------- Small utilities ----------
+const $ = (sel, root = document) => root.querySelector(sel);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const fold = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ł/g, 'l');
+const today = () => new Date().toISOString().slice(0, 10);
+const fmtDate = (d) => { if (!d) return ''; const x = new Date(d); return isNaN(x) ? String(d) : x.toLocaleDateString('pl-PL'); };
+const byName = (a, b) => (a.order ?? 999) - (b.order ?? 999) || String(a.name || '').localeCompare(String(b.name || ''), 'pl');
+const byNumber = (a, b) => String(a.number || a.title || '').localeCompare(String(b.number || b.title || ''), 'pl', { numeric: true });
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+const ICON = {
+  back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',
+  chev: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>',
+  folder: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 6.5A1.5 1.5 0 0 1 4.5 5h4.2l2 2.2h8.8A1.5 1.5 0 0 1 21 8.7v9.8a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5z"/></svg>',
+  search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>',
+  plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  minus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14"/></svg>',
+  fit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>',
+  edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>',
+  pdf: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 13h6M9 17h6"/></svg>',
+  link: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>',
+  pin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>',
+  report: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M6 3h9l4 4v14H6z"/><path d="M12 10v7M9 14l3 3 3-3"/></svg>',
+  cam: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>',
+  img: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></svg>',
+  gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
+  share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/></svg>',
+  dots: '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>',
+};
+
+const DOC_TYPES = [
+  ['NORMA', 'Norma'], ['AKT', 'Akt prawny'], ['WT', 'Warunki techniczne'], ['ZESZYT', 'Zeszyt techniczny'], ['INNE', 'Inne'],
+];
+const TYPE_SHORT = { NORMA: 'NORMA', AKT: 'AKT', WT: 'WT', ZESZYT: 'ZESZYT', INNE: 'INNE' };
+const CATEGORIES = ['Ściany / tynki', 'Malowanie', 'Posadzki', 'Sufity', 'Stolarka drzwiowa', 'Okna i parapety', 'Instalacja elektryczna', 'Instalacja wod-kan', 'Ogrzewanie / wentylacja', 'Balkon / taras', 'Elewacja', 'Inne'];
+// Built-in quick phrases per defect category (the user can add own ones, stored in db settings/phrases).
+const PHRASES = {
+  'Ściany / tynki': ['Rysa na tynku', 'Odspojenie tynku', 'Nierówność ściany ponad dopuszczalną tolerancję', 'Uszkodzony narożnik ściany', 'Ubytek w tynku', 'Zabrudzenie ściany'],
+  'Malowanie': ['Zacieki farby', 'Prześwity / niedomalowania', 'Zabrudzenia farbą', 'Nierówna faktura powłoki', 'Odbarwienia powłoki'],
+  'Posadzki': ['Nierówność posadzki', 'Rysa w wylewce', 'Odspojona płytka (głuchy odgłos)', 'Pęknięta płytka', 'Nierówna lub niepełna fuga', 'Uszkodzona listwa przypodłogowa'],
+  'Sufity': ['Rysa na suficie', 'Nierówność sufitu', 'Zaciek na suficie', 'Ubytek tynku na suficie'],
+  'Stolarka drzwiowa': ['Uszkodzona ościeżnica', 'Skrzydło drzwi ociera', 'Nieprawidłowa regulacja zamka', 'Rysa na skrzydle drzwi', 'Brak uszczelki', 'Brak lub uszkodzona klamka'],
+  'Okna i parapety': ['Rysa na szybie', 'Zarysowana rama okna', 'Uszkodzona uszczelka', 'Nieprawidłowa regulacja okucia', 'Uszkodzony parapet', 'Brak silikonu przy parapecie', 'Brak zaślepek odwodnienia'],
+  'Instalacja elektryczna': ['Brak osprzętu', 'Gniazdo niezamocowane', 'Brak zasilania w obwodzie', 'Brak opisu obwodów w rozdzielnicy', 'Uszkodzona ramka łącznika'],
+  'Instalacja wod-kan': ['Przeciek', 'Nieszczelne podejście', 'Brak zaworu', 'Brak silikonu', 'Brak zaślepki podejścia'],
+  'Ogrzewanie / wentylacja': ['Nieszczelny grzejnik', 'Uszkodzony grzejnik', 'Brak głowicy termostatycznej', 'Brak ciągu w kratce wentylacyjnej', 'Brak kratki wentylacyjnej'],
+  'Balkon / taras': ['Brak spadku – zastoiny wody', 'Uszkodzona balustrada', 'Odspojona płytka na balkonie', 'Uszkodzona obróbka blacharska'],
+  'Elewacja': ['Rysa na elewacji', 'Zabrudzenie elewacji', 'Ubytek tynku elewacyjnego'],
+  'Inne': ['Brak elementu zgodnie z umową', 'Zabrudzenie po robotach', 'Wymaga weryfikacji'],
+};
+const ROOMS = ['Przedpokój', 'Salon', 'Kuchnia', 'Aneks kuchenny', 'Sypialnia', 'Pokój', 'Łazienka', 'WC', 'Garderoba', 'Balkon', 'Taras', 'Komórka lokatorska', 'Hall'];
+
+// ---------- App state ----------
+const S = {
+  db: null, assets: null, downloads: null, noDb: false,
+  sections: [], docs: [], projects: [], defects: [], settings: [],
+  loaded: {},
+  route: { name: 'lib' },
+  libSection: null,
+  query: '',
+  lastProject: null,
+};
+const PV = { projectId: null, planId: null, s: 1, tx: 0, ty: 0, adding: false, moving: null, ghost: null, sel: null, filter: 'plan' };
+const ownPhrases = () => ((S.settings.find((x) => x.id === 'phrases') || {}).items || []);
+
+// ---------- Toast / busy / confirm ----------
+let toastTimer;
+function toast(msg) {
+  let t = $('.toast');
+  if (!t) { t = document.createElement('div'); t.className = 'toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); }
+  t.textContent = msg; t.hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 3200);
+}
+function busy(on, title, text, pct) {
+  const b = $('#busy'); b.hidden = !on;
+  if (!on) return;
+  if (title != null) $('#busyT').textContent = title;
+  $('#busyP').textContent = text || '';
+  $('#busyBar').style.width = (pct == null ? 0 : Math.round(pct * 100)) + '%';
+}
+function askConfirm(title, text, okLabel = 'Usuń', danger = true) {
+  return new Promise((resolve) => {
+    const c = $('#confirm');
+    c.innerHTML = `<div class="backdrop" data-c="0"></div><div class="sheet" role="alertdialog" aria-modal="true"><div class="grab"></div>
+      <h2>${esc(title)}</h2><p class="lead">${esc(text)}</p>
+      <div class="actions"><button class="btn" data-c="0" type="button">Anuluj</button><button class="btn ${danger ? 'danger' : 'primary'}" data-c="1" type="button">${esc(okLabel)}</button></div></div>`;
+    c.hidden = false;
+    c.onclick = (e) => { const v = e.target.closest('[data-c]'); if (!v) return; c.hidden = true; c.innerHTML = ''; resolve(v.dataset.c === '1'); };
+  });
+}
+
+// ---------- Sheet (bottom modal) ----------
+let sheetOnClose = null;
+function openSheet(html, onMount, onClose) {
+  const el = $('#sheet');
+  el.innerHTML = `<div class="backdrop" data-act="sheet-close"></div><div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>${html}</div>`;
+  el.hidden = false; document.body.classList.add('locked');
+  sheetOnClose = onClose || null;
+  if (onMount) onMount(el.querySelector('.sheet'));
+}
+function closeSheet(fromPop) {
+  const el = $('#sheet'); if (el.hidden) return;
+  const cb = sheetOnClose; sheetOnClose = null;
+  el.hidden = true; el.innerHTML = '';
+  if ($('#viewer').hidden) document.body.classList.remove('locked');
+  if (cb) cb();
+}
+
+// ---------- History (Android back button support) ----------
+let skipPop = 0;
+function pushHistory(state) { try { history.pushState(state, ''); } catch (e) {} }
+function backQuiet() { try { skipPop++; history.back(); } catch (e) { skipPop = 0; } }
+window.addEventListener('popstate', (e) => {
+  if (skipPop > 0) { skipPop--; return; }
+  // Sheets do not own history entries: close them and restore the current route entry.
+  if ($('#annot')) { $('#annot [data-a="cancel"]').click(); pushHistory({ route: S.route }); return; }
+  if (!$('#confirm').hidden) { $('#confirm').click && $('#confirm').querySelector('[data-c="0"]')?.click(); pushHistory({ route: S.route }); return; }
+  if (!$('#sheet').hidden) { closeSheet(true); pushHistory({ route: S.route }); return; }
+  if (!$('#viewer').hidden) { closeViewer(true); return; }
+  const r = e.state && e.state.route;
+  if (r) { S.route = r; render(); window.scrollTo(0, 0); }
+});
+function navigate(route) {
+  S.route = route; pushHistory({ route }); render(); window.scrollTo(0, 0);
+}
+try { history.replaceState({ route: S.route }, ''); } catch (e) {}
+
+// ---------- Starter library (written once on first run) ----------
+const SEED = {
+  lib_sections: [
+    { id: 's_akty', name: 'Akty prawne', parent: null, order: 1, note: 'Ustawy i rozporządzenia' },
+    { id: 's_ustawy', name: 'Ustawy', parent: 's_akty', order: 1 },
+    { id: 's_rozp', name: 'Rozporządzenia', parent: 's_akty', order: 2 },
+    { id: 's_wt', name: 'Warunki techniczne', parent: null, order: 2, note: 'WT dla budynków' },
+    { id: 's_normy', name: 'Normy', parent: null, order: 3, note: 'PN, PN-EN – dołącz własne pliki' },
+    { id: 's_eurokody', name: 'Eurokody', parent: 's_normy', order: 1 },
+    { id: 's_wykon', name: 'Wykonawstwo i odbiory', parent: 's_normy', order: 2 },
+    { id: 's_zeszyty', name: 'Zeszyty techniczne', parent: null, order: 4, note: 'ITB, WTWiO i inne' },
+  ],
+  lib_docs: [
+    { id: 'd_pb', type: 'AKT', number: 'Dz.U. 2026 poz. 524', title: 'Ustawa z dnia 7 lipca 1994 r. – Prawo budowlane (tekst jednolity)', section: 's_ustawy', url: 'https://isap.sejm.gov.pl/isap.nsf/DocDetails.xsp?id=WDU20260000524', notes: 'Tekst jednolity ogłoszony w 2026 r. Sprawdzaj w ISAP późniejsze zmiany (m.in. ustawa z 31 lipca 2026 r., Dz.U. 2026 poz. 1161 – przepisy przejściowe dot. nowych warunków technicznych).', asset: null, chapters: [], createdAt: 1793000000000 },
+    { id: 'd_dew', type: 'AKT', number: 'Dz.U. 2021 poz. 1177', title: 'Ustawa z dnia 20 maja 2021 r. o ochronie praw nabywcy lokalu mieszkalnego lub domu jednorodzinnego oraz Deweloperskim Funduszu Gwarancyjnym (ustawa deweloperska)', section: 's_ustawy', url: 'https://isap.sejm.gov.pl/isap.nsf/DocDetails.xsp?id=WDU20210001177', notes: 'Kluczowa przy odbiorach deweloperskich: odbiór lokalu, protokół, zgłaszanie wad i terminy ich usunięcia przez dewelopera (art. 41). Aktualny tekst jednolity znajdziesz w ISAP pod linkiem.', asset: null, chapters: [{ id: 'c41', no: 'Art. 41', title: 'Odbiór lokalu i wady', page: '', notes: 'Odbiór w obecności nabywcy, protokół z wykazem wad. Deweloper w ciągu 14 dni od podpisania protokołu potwierdza uznanie wad albo odmawia z uzasadnieniem (na papierze lub innym trwałym nośniku). Brak odpowiedzi w 14 dni = uznanie wad. Uznane wady usuwa w ciągu 30 dni od podpisania protokołu; może wyznaczyć nowy termin z uzasadnieniem. Po bezskutecznym upływie terminu wyznaczonego przez nabywcę wady można usunąć na koszt dewelopera.' }], createdAt: 1793000000000 },
+    { id: 'd_kc', type: 'AKT', number: 'Dz.U. 1964 nr 16 poz. 93', title: 'Ustawa z dnia 23 kwietnia 1964 r. – Kodeks cywilny', section: 's_ustawy', url: 'https://isap.sejm.gov.pl/isap.nsf/DocDetails.xsp?id=WDU19640160093', notes: 'Rękojmia za wady rzeczy sprzedanej – art. 556 i nast. Aktualny tekst jednolity w ISAP.', asset: null, chapters: [{ id: 'c556', no: 'Art. 556', title: 'Rękojmia za wady', page: '', notes: '' }], createdAt: 1793000000000 },
+    { id: 'd_wt', type: 'WT', number: 'Dz.U. 2022 poz. 1225', title: 'Rozporządzenie Ministra Infrastruktury z dnia 12 kwietnia 2002 r. w sprawie warunków technicznych, jakim powinny odpowiadać budynki i ich usytuowanie (tekst jednolity)', section: 's_wt', url: 'https://isap.sejm.gov.pl/isap.nsf/DocDetails.xsp?id=WDU20220001225', notes: 'Status (październik 2026): ISAP podaje to rozporządzenie jako uznane za uchylone z dniem 21.09.2026. Nowe rozporządzenie (projekt „WT2026”) nie zostało jeszcze ogłoszone w Dzienniku Ustaw, a ustawa z 31.07.2026 (Dz.U. poz. 1161) wprowadza 18-miesięczny okres przejściowy. Sprawdzaj aktualny stan w ISAP.\nZmiany: Dz.U. 2023 poz. 2442, Dz.U. 2024 poz. 726.', asset: null, chapters: [], createdAt: 1793000000000 },
+    { id: 'd_en1990', type: 'NORMA', number: 'PN-EN 1990', title: 'Eurokod – Podstawy projektowania konstrukcji', section: 's_eurokody', url: '', notes: 'Treść normy jest chroniona prawem autorskim (PKN). Dołącz własny egzemplarz PDF.', asset: null, chapters: [], createdAt: 1793000000000 },
+    { id: 'd_en1991', type: 'NORMA', number: 'PN-EN 1991-1-1', title: 'Eurokod 1 – Oddziaływania na konstrukcje, cz. 1-1: Oddziaływania ogólne', section: 's_eurokody', url: '', notes: 'Dołącz własny egzemplarz PDF.', asset: null, chapters: [], createdAt: 1793000000000 },
+    { id: 'd_en1992', type: 'NORMA', number: 'PN-EN 1992-1-1', title: 'Eurokod 2 – Projektowanie konstrukcji z betonu, cz. 1-1: Reguły ogólne i reguły dla budynków', section: 's_eurokody', url: '', notes: 'Dołącz własny egzemplarz PDF.', asset: null, chapters: [], createdAt: 1793000000000 },
+    { id: 'd_en1996', type: 'NORMA', number: 'PN-EN 1996-1-1', title: 'Eurokod 6 – Projektowanie konstrukcji murowych, cz. 1-1', section: 's_eurokody', url: '', notes: 'Dołącz własny egzemplarz PDF.', asset: null, chapters: [], createdAt: 1793000000000 },
+    { id: 'd_en1997', type: 'NORMA', number: 'PN-EN 1997-1', title: 'Eurokod 7 – Projektowanie geotechniczne, cz. 1: Zasady ogólne', section: 's_eurokody', url: '', notes: 'Dołącz własny egzemplarz PDF.', asset: null, chapters: [], createdAt: 1793000000000 },
+    { id: 'd_en13670', type: 'NORMA', number: 'PN-EN 13670', title: 'Wykonywanie konstrukcji z betonu', section: 's_wykon', url: '', notes: 'Dołącz własny egzemplarz PDF.', asset: null, chapters: [], createdAt: 1793000000000 },
+  ],
+};
+
+// ---------- Library loading (local files, cached by the service worker) ----------
+const APP_VERSION = '1.0.0';
+const loadedScripts = {};
+function loadScript(src) {
+  if (!loadedScripts[src]) loadedScripts[src] = new Promise((res, rej) => {
+    const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = () => { delete loadedScripts[src]; rej(new Error('script')); };
+    document.head.appendChild(s);
+  });
+  return loadedScripts[src];
+}
+async function ensurePdfJs() {
+  await loadScript('./pdf.js');
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc = './pdf.worker.js';
+  return window.pdfjsLib;
+}
+
+// ---------- Minimal PDF writer: one full-page JPEG per A4 page ----------
+class MiniPdf {
+  constructor() { this.pages = []; }
+  addJpeg(bytes, w, h) { this.pages.push({ bytes, w, h }); }
+  toBlob() {
+    const enc = new TextEncoder(); const parts = []; const offsets = []; let pos = 0;
+    const push = (x) => { const b = typeof x === 'string' ? enc.encode(x) : x; parts.push(b); pos += b.length; };
+    const obj = (num, chunks) => { offsets[num] = pos; push(num + ' 0 obj\n'); for (const c of [].concat(chunks)) push(c); push('\nendobj\n'); };
+    push('%PDF-1.4\n%âãÏÓ\n');
+    const n = this.pages.length; const W = 595.28, H = 841.89;
+    obj(1, '<< /Type /Catalog /Pages 2 0 R >>');
+    obj(2, `<< /Type /Pages /Kids [${this.pages.map((_, i) => (3 + i * 3) + ' 0 R').join(' ')}] /Count ${n} >>`);
+    this.pages.forEach((p, i) => {
+      const pn = 3 + i * 3, cn = pn + 1, im = pn + 2;
+      obj(pn, `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /XObject << /Im${i} ${im} 0 R >> >> /Contents ${cn} 0 R >>`);
+      const content = `q ${W} 0 0 ${H} 0 0 cm /Im${i} Do Q`;
+      obj(cn, `<< /Length ${content.length} >>\nstream\n${content}\nendstream`);
+      obj(im, [`<< /Type /XObject /Subtype /Image /Width ${p.w} /Height ${p.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${p.bytes.length} >>\nstream\n`, p.bytes, '\nendstream']);
+    });
+    const xref = pos; const count = 3 + n * 3;
+    let x = `xref\n0 ${count}\n0000000000 65535 f \n`;
+    for (let k = 1; k < count; k++) x += String(offsets[k]).padStart(10, '0') + ' 00000 n \n';
+    push(x); push(`trailer\n<< /Size ${count} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`);
+    return new Blob(parts, { type: 'application/pdf' });
+  }
+}
+
+// ---------- ZIP (store) writer and reader for backups ----------
+const CRC_T = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+function crc32(u8) { let c = 0xFFFFFFFF; for (let i = 0; i < u8.length; i++) c = CRC_T[(c ^ u8[i]) & 0xFF] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+async function makeZip(files, onProgress) {
+  const enc = new TextEncoder(); const parts = []; const central = []; let offset = 0;
+  const d = new Date();
+  const dosTime = (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1);
+  const dosDate = ((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate();
+  for (let i = 0; i < files.length; i++) {
+    const f = files[i]; const name = enc.encode(f.name);
+    const crc = crc32(new Uint8Array(await f.blob.arrayBuffer())); const size = f.blob.size;
+    const h = new DataView(new ArrayBuffer(30));
+    h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(8, 0, true);
+    h.setUint16(10, dosTime, true); h.setUint16(12, dosDate, true); h.setUint32(14, crc, true);
+    h.setUint32(18, size, true); h.setUint32(22, size, true); h.setUint16(26, name.length, true); h.setUint16(28, 0, true);
+    parts.push(h.buffer, name, f.blob);
+    const c = new DataView(new ArrayBuffer(46));
+    c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true); c.setUint16(10, 0, true);
+    c.setUint16(12, dosTime, true); c.setUint16(14, dosDate, true); c.setUint32(16, crc, true); c.setUint32(20, size, true); c.setUint32(24, size, true);
+    c.setUint16(28, name.length, true); c.setUint32(42, offset, true);
+    central.push(c.buffer, name);
+    offset += 30 + name.length + size;
+    if (onProgress) onProgress(i + 1, files.length);
+  }
+  const cdSize = central.reduce((s, b) => s + b.byteLength, 0);
+  const e = new DataView(new ArrayBuffer(22));
+  e.setUint32(0, 0x06054b50, true); e.setUint16(8, files.length, true); e.setUint16(10, files.length, true); e.setUint32(12, cdSize, true); e.setUint32(16, offset, true);
+  return new Blob([...parts, ...central, e.buffer], { type: 'application/zip' });
+}
+async function readZip(file) {
+  const tailLen = Math.min(file.size, 65557);
+  const tail = new DataView(await file.slice(file.size - tailLen).arrayBuffer());
+  let eocd = -1; for (let i = tailLen - 22; i >= 0; i--) if (tail.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+  if (eocd < 0) throw new Error('zip');
+  const count = tail.getUint16(eocd + 10, true), cdSize = tail.getUint32(eocd + 12, true), cdOff = tail.getUint32(eocd + 16, true);
+  const cd = new DataView(await file.slice(cdOff, cdOff + cdSize).arrayBuffer()); const dec = new TextDecoder(); const out = new Map(); let p = 0;
+  for (let k = 0; k < count; k++) {
+    if (cd.getUint32(p, true) !== 0x02014b50) throw new Error('zip');
+    const method = cd.getUint16(p + 10, true), csize = cd.getUint32(p + 20, true);
+    const nlen = cd.getUint16(p + 28, true), xlen = cd.getUint16(p + 30, true), clen = cd.getUint16(p + 32, true), loff = cd.getUint32(p + 42, true);
+    const name = dec.decode(new Uint8Array(cd.buffer, p + 46, nlen));
+    out.set(name, {
+      async blob(type = '') {
+        const lh = new DataView(await file.slice(loff, loff + 30).arrayBuffer());
+        const start = loff + 30 + lh.getUint16(26, true) + lh.getUint16(28, true);
+        const raw = file.slice(start, start + csize);
+        if (method === 0) return new Blob([raw], { type });
+        if (method === 8) { const b = await new Response(raw.stream().pipeThrough(new DecompressionStream('deflate-raw'))).blob(); return new Blob([b], { type }); }
+        throw new Error('zip-method');
+      },
+    });
+    p += 46 + nlen + xlen + clen;
+  }
+  return out;
+}
+
+// ---------- Local storage: IndexedDB with an in-memory mirror ----------
+const COLS = { sections: 'lib_sections', docs: 'lib_docs', projects: 'projects', defects: 'defects', settings: 'settings' };
+let IDB = null; const MEM = {}; const LIS = {}; const URLS = new Map();
+const blobUrl = (id) => URLS.get(id) || '';
+const lsGet = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, String(v)); } catch (e) {} };
+const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+function idbOpen() {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open('pomocnik-inzyniera', 1);
+    r.onupgradeneeded = () => { const d = r.result; for (const c of Object.values(COLS)) d.createObjectStore(c); d.createObjectStore('assets'); };
+    r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+  });
+}
+function idbReq(store, mode, fn) {
+  return new Promise((res, rej) => {
+    let t; try { t = IDB.transaction(store, mode); } catch (e) { rej(e); return; }
+    const r = fn(t.objectStore(store));
+    t.oncomplete = () => res(r ? r.result : undefined);
+    t.onerror = () => rej(t.error); t.onabort = () => rej(t.error || new Error('abort'));
+  });
+}
+async function idbEntries(store) {
+  const keys = await idbReq(store, 'readonly', (s) => s.getAllKeys());
+  const vals = await idbReq(store, 'readonly', (s) => s.getAll());
+  return keys.map((k, i) => [k, vals[i]]);
+}
+const wrapErr = (e) => (e && e.name === 'QuotaExceededError') ? { code: 'quota' } : (e && e.code ? e : { code: 'local' });
+function emit(col) {
+  const docs = [...MEM[col].entries()].map(([id, data]) => ({ id, data: () => data }));
+  (LIS[col] || []).forEach((cb) => cb({ docs }));
+}
+const localDb = {
+  collection(col) {
+    return {
+      doc(id) {
+        const did = id || newId();
+        return {
+          id: did,
+          async set(data) { const v = JSON.parse(JSON.stringify(data)); try { await idbReq(col, 'readwrite', (s) => s.put(v, did)); } catch (e) { throw wrapErr(e); } MEM[col].set(did, v); emit(col); },
+          async update(data) {
+            const cur = MEM[col].get(did); if (!cur) throw { code: 'missing' };
+            const v = { ...cur, ...JSON.parse(JSON.stringify(data)) };
+            try { await idbReq(col, 'readwrite', (s) => s.put(v, did)); } catch (e) { throw wrapErr(e); } MEM[col].set(did, v); emit(col);
+          },
+          async delete() { await idbReq(col, 'readwrite', (s) => s.delete(did)); MEM[col].delete(did); emit(col); },
+        };
+      },
+    };
+  },
+};
+const localAssets = {
+  async upload(blob, opts) {
+    const type = (opts && opts.type) || blob.type || 'application/octet-stream';
+    const b = blob.type === type ? blob : new Blob([blob], { type });
+    const id = newId();
+    try { await idbReq('assets', 'readwrite', (s) => s.put({ blob: b, type, created: Date.now() }, id)); } catch (e) { throw wrapErr(e); }
+    URLS.set(id, URL.createObjectURL(b));
+    return { id, url: URLS.get(id) };
+  },
+  async delete(id) {
+    await idbReq('assets', 'readwrite', (s) => s.delete(id));
+    const u = URLS.get(id); if (u) URL.revokeObjectURL(u); URLS.delete(id);
+  },
+};
+async function initData() {
+  try { IDB = await idbOpen(); } catch (e) { S.noDb = true; render(); return; }
+  try {
+    for (const col of Object.values(COLS)) MEM[col] = new Map(await idbEntries(col));
+    for (const [id, v] of await idbEntries('assets')) if (v && v.blob) URLS.set(id, URL.createObjectURL(v.blob));
+    if (!lsGet('pi_seeded') && MEM.lib_sections.size === 0 && MEM.lib_docs.size === 0) {
+      for (const [col, list] of Object.entries(SEED)) for (const rec of list) { const { id, ...rest } = rec; await idbReq(col, 'readwrite', (s) => s.put(rest, id)); MEM[col].set(id, rest); }
+      lsSet('pi_seeded', '1');
+    }
+  } catch (e) { S.noDb = true; render(); return; }
+  S.db = localDb; S.assets = localAssets;
+  for (const [key, col] of Object.entries(COLS)) {
+    LIS[col] = [(snap) => { S[key] = snap.docs.map((d) => ({ id: d.id, ...d.data() })); S.loaded[key] = true; render(); }];
+    emit(col);
+  }
+  try { if (navigator.storage && navigator.storage.persist) await navigator.storage.persist(); } catch (e) {}
+}
+function dbErr(e) {
+  const c = e && e.code;
+  if (c === 'quota') return 'Brak miejsca w pamięci telefonu. Zrób kopię zapasową i usuń stare odbiory.';
+  if (c === 'no_assets') return 'Pamięć telefonu jest niedostępna (np. tryb incognito).';
+  return 'Nie udało się zapisać danych w telefonie. Spróbuj ponownie.';
+}
+async function save(col, id, data) { const ref = S.db.collection(col).doc(id); await ref.set(data); return ref.id; }
+async function patch(col, id, data) { await S.db.collection(col).doc(id).update(data); }
+async function remove(col, id) { await S.db.collection(col).doc(id).delete(); }
+async function uploadBlob(blob, type) {
+  if (!S.assets) throw { code: 'no_assets' };
+  const r = await S.assets.upload(blob, type ? { type } : undefined);
+  return r.id;
+}
+async function dropAsset(id) { if (!id || !S.assets) return; try { await S.assets.delete(id); } catch (e) { /* already gone */ } }
+
+// ---------- Sharing and saving files ----------
+async function shareFile(blob, fname, title) {
+  const file = new File([blob], fname, { type: blob.type });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], title }); return true; }
+    catch (e) { if (e && e.name === 'AbortError') return false; }
+  }
+  toast('Udostępnianie nie jest dostępne na tym urządzeniu. Użyj „Zapisz w telefonie”.');
+  return false;
+}
+function downloadFile(blob, fname) {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = fname;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 5000);
+}
+function fileReady(title, fname, blob, lead, note) {
+  openSheet(`<h2>${esc(title)}</h2><p class="lead">${esc(fname)} · ${(blob.size / 1048576).toFixed(1)} MB${lead ? ' · ' + esc(lead) : ''}</p>
+    ${note ? `<div class="note" style="margin-bottom:14px">${note}</div>` : ''}
+    <div class="actions"><button class="btn" type="button" id="fSaveFile">${ICON.report} Zapisz w telefonie</button><button class="btn accent" type="button" id="fShare">${ICON.share} Udostępnij</button></div>`, (el) => {
+    $('#fShare', el).onclick = () => shareFile(blob, fname, title);
+    $('#fSaveFile', el).onclick = () => { downloadFile(blob, fname); toast('Plik zapisano w folderze Pobrane'); };
+  });
+}
+
+// ---------- Backup & restore ----------
+async function createBackup() {
+  try {
+    busy(true, 'Tworzenie kopii', 'Zbieranie danych…', 0.05);
+    const collections = {};
+    for (const col of Object.values(COLS)) collections[col] = [...MEM[col].entries()].map(([id, data]) => ({ id, ...data }));
+    const assets = await idbEntries('assets');
+    const files = [{ name: 'data.json', blob: new Blob([JSON.stringify({ app: 'pomocnik-inzyniera', format: 1, version: APP_VERSION, exportedAt: new Date().toISOString(), collections, assets: assets.map(([id, v]) => ({ id, type: v.type })) })], { type: 'application/json' }) }];
+    for (const [id, v] of assets) files.push({ name: 'assets/' + id, blob: v.blob });
+    const zip = await makeZip(files, (i, n) => busy(true, 'Tworzenie kopii', `Plik ${i} z ${n}`, 0.1 + 0.85 * i / n));
+    busy(false);
+    lsSet('pi_lastBackup', Date.now());
+    const d = new Date(); const stamp = d.toISOString().slice(0, 10) + '_' + String(d.getHours()).padStart(2, '0') + String(d.getMinutes()).padStart(2, '0');
+    fileReady('Kopia zapasowa gotowa', `Pomocnik_kopia_${stamp}.zip`, zip, `${files.length - 1} ${plural(files.length - 1, 'plik', 'pliki', 'plików')}`,
+      'Zapisz kopię poza telefonem: najlepiej „Udostępnij” → Dysk Google albo wyślij sobie e-mailem. Przywrócisz ją w Ustawieniach.');
+    if (S.route.name === 'projects') render();
+  } catch (e) { busy(false); toast('Nie udało się utworzyć kopii.'); console.error(e); }
+}
+async function restoreBackup(file) {
+  if (!(await askConfirm('Przywrócić kopię?', 'Wszystkie obecne dane w aplikacji zostaną zastąpione danymi z pliku kopii.', 'Przywróć', true))) return;
+  try {
+    busy(true, 'Przywracanie kopii', file.name, 0.05);
+    const entries = await readZip(file);
+    const dj = entries.get('data.json'); if (!dj) throw new Error('format');
+    const data = JSON.parse(await (await dj.blob('application/json')).text());
+    if (data.app !== 'pomocnik-inzyniera') throw new Error('format');
+    for (const st of [...Object.values(COLS), 'assets']) await idbReq(st, 'readwrite', (s) => s.clear());
+    for (const u of URLS.values()) URL.revokeObjectURL(u); URLS.clear();
+    for (const col of Object.values(COLS)) MEM[col] = new Map();
+    const list = data.assets || [];
+    for (let i = 0; i < list.length; i++) {
+      const a = list[i]; const e = entries.get('assets/' + a.id); if (!e) continue;
+      const b = await e.blob(a.type);
+      await idbReq('assets', 'readwrite', (s) => s.put({ blob: b, type: a.type, created: Date.now() }, a.id));
+      URLS.set(a.id, URL.createObjectURL(b));
+      busy(true, 'Przywracanie kopii', `Plik ${i + 1} z ${list.length}`, 0.1 + 0.8 * (i + 1) / list.length);
+    }
+    for (const col of Object.values(COLS)) for (const rec of (data.collections || {})[col] || []) {
+      const { id, ...rest } = rec; await idbReq(col, 'readwrite', (s) => s.put(rest, id)); MEM[col].set(id, rest);
+    }
+    lsSet('pi_seeded', '1');
+    busy(false); closeSheet();
+    for (const col of Object.values(COLS)) emit(col);
+    navigate({ name: 'lib' }); toast('Przywrócono dane z kopii');
+  } catch (e) {
+    busy(false); toast(e && e.name === 'QuotaExceededError' ? dbErr({ code: 'quota' }) : 'To nie jest prawidłowy plik kopii Pomocnika Inżyniera.'); console.error(e);
+  }
+}
+function backupReminder() {
+  const last = +lsGet('pi_lastBackup') || 0;
+  if (!S.projects.length || Date.now() - last < 7 * 864e5) return '';
+  return `<div class="note warn" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px"><span style="flex:1;min-width:200px">${last ? 'Ostatnia kopia zapasowa ma ponad tydzień.' : 'Nie masz jeszcze kopii zapasowej.'} Dane są zapisane tylko w tym telefonie.</span><button class="btn sm" type="button" data-act="backup-now">Zrób kopię</button></div>`;
+}
+
+// ---------- Settings & install ----------
+let installPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); installPrompt = e; });
+window.addEventListener('appinstalled', () => { installPrompt = null; toast('Zainstalowano aplikację'); });
+async function openSettings() {
+  let est = null, persisted = null;
+  try { est = await navigator.storage.estimate(); } catch (e) {}
+  try { persisted = await navigator.storage.persisted(); } catch (e) {}
+  const last = +lsGet('pi_lastBackup') || 0;
+  const mb = (b) => (b / 1048576).toFixed(b > 1048576 * 100 ? 0 : 1) + ' MB';
+  const standalone = matchMedia('(display-mode: standalone)').matches;
+  openSheet(`<h2>Ustawienia</h2><p class="lead">Wszystkie dane są zapisane tylko w tym telefonie.</p>
+    ${installPrompt && !standalone ? `<div class="row" style="margin-bottom:6px"><button class="btn primary" type="button" id="sInstall">${ICON.plus} Zainstaluj aplikację</button></div>` : ''}
+    <div class="label"><span>Kopia zapasowa</span></div>
+    <p class="note">${last ? 'Ostatnia kopia: ' + esc(new Date(last).toLocaleString('pl-PL')) + '.' : 'Nie zrobiono jeszcze kopii.'} Kopia to jeden plik ZIP ze wszystkimi danymi i zdjęciami. Trzymaj ją poza telefonem, np. na Dysku Google.</p>
+    <div class="row" style="margin-top:10px"><button class="btn accent" type="button" id="sBackup">Utwórz kopię</button><button class="btn" type="button" id="sRestore">Przywróć z kopii</button><input type="file" id="sRestoreFile" accept=".zip,application/zip" class="vh" tabindex="-1"></div>
+    <div class="label"><span>Pamięć</span></div>
+    <p class="note">${est ? `Zajęte: ${mb(est.usage || 0)} z dostępnych ok. ${mb(est.quota || 0)}.` : 'Brak informacji o zajętej pamięci.'}
+      ${persisted ? ' Trwałe przechowywanie jest włączone: Chrome nie usunie danych sam z siebie.' : ' Trwałe przechowywanie nie jest potwierdzone. Zainstaluj aplikację na ekranie głównym i regularnie rób kopie.'}</p>
+    <p style="font-size:13px;color:var(--muted);margin:16px 0 0">Pomocnik Inżyniera · wersja ${APP_VERSION} · działa offline</p>
+    <div class="actions"><button class="btn" type="button" data-act="sheet-close">Zamknij</button></div>`, (el) => {
+    $('#sBackup', el).onclick = () => { closeSheet(); createBackup(); };
+    $('#sRestore', el).onclick = () => $('#sRestoreFile', el).click();
+    $('#sRestoreFile', el).onchange = (e) => { const f = e.target.files[0]; if (f) restoreBackup(f); };
+    const ins = $('#sInstall', el);
+    if (ins) ins.onclick = async () => { const p = installPrompt; if (!p) return; installPrompt = null; p.prompt(); try { await p.userChoice; } catch (e) {} closeSheet(); };
+  });
+}
+
+// ---------- Image helpers ----------
+async function decodeImage(file) {
+  try { return await createImageBitmap(file, { imageOrientation: 'from-image' }); } catch (e) {}
+  return await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = URL.createObjectURL(file); });
+}
+async function toJpeg(file, maxDim, q = 0.85) {
+  const img = await decodeImage(file);
+  const w0 = img.width, h0 = img.height; const k = Math.min(1, maxDim / Math.max(w0, h0));
+  const w = Math.round(w0 * k), h = Math.round(h0 * k);
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, w, h); g.drawImage(img, 0, 0, w, h);
+  const blob = await new Promise((r) => c.toBlob(r, 'image/jpeg', q));
+  return { blob, w, h };
+}
+function loadImg(src) {
+  return new Promise((res) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; });
+}
+async function pdfToImages(file, onProgress) {
+  const pdfjsLib = await ensurePdfJs();
+  const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+  const out = [];
+  for (let i = 1; i <= pdf.numPages; i++) {
+    onProgress && onProgress(i, pdf.numPages);
+    const page = await pdf.getPage(i);
+    const v1 = page.getViewport({ scale: 1 });
+    const scale = Math.min(4, 2800 / Math.max(v1.width, v1.height));
+    const vp = page.getViewport({ scale });
+    const c = document.createElement('canvas'); c.width = Math.round(vp.width); c.height = Math.round(vp.height);
+    const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height);
+    await page.render({ canvasContext: g, viewport: vp }).promise;
+    const blob = await new Promise((r) => c.toBlob(r, 'image/jpeg', 0.9));
+    out.push({ blob, w: c.width, h: c.height });
+    c.width = c.height = 1; // free memory on phones
+  }
+  return out;
+}
+
+// =====================================================================
+// RENDERING / ROUTER
+// =====================================================================
+let mountedKey = null;
+function render() {
+  const r = S.route; const key = r.name + ':' + (r.id || '');
+  const main = $('#main');
+  const view = VIEWS[r.name] || VIEWS.lib;
+  if (mountedKey !== key) { mountedKey = key; view.mount(main, r); }
+  view.update(main, r);
+  const tab = (r.name === 'projects' || r.name === 'project') ? 'projects' : 'lib';
+  $('#tab-lib').setAttribute('aria-current', tab === 'lib' ? 'page' : 'false');
+  $('#tab-projects').setAttribute('aria-current', tab === 'projects' ? 'page' : 'false');
+}
+function noDbNote() {
+  return S.noDb ? `<p class="note warn">Pamięć telefonu jest niedostępna (np. tryb incognito lub zablokowane dane witryny). Zmiany nie zostaną zapisane.</p>` : '';
+}
+
+// ---------------- LIBRARY ----------------
+function sectionPath(id) {
+  const out = []; let cur = S.sections.find((s) => s.id === id); let guard = 0;
+  while (cur && guard++ < 20) { out.unshift(cur); cur = S.sections.find((s) => s.id === cur.parent); }
+  return out;
+}
+function descendantIds(id) {
+  const out = new Set([id]); let added = true;
+  while (added) { added = false; for (const s of S.sections) if (s.parent && out.has(s.parent) && !out.has(s.id)) { out.add(s.id); added = true; } }
+  return out;
+}
+function docCount(id) { const ids = descendantIds(id); return S.docs.filter((d) => ids.has(d.section)).length; }
+function hl(text, terms) {
+  let html = esc(text); if (!terms.length) return html;
+  // Highlight on folded text by mapping positions (same length for Polish letters after folding).
+  const f = fold(text); const marks = [];
+  for (const t of terms) { let i = f.indexOf(t); while (i >= 0 && t) { marks.push([i, i + t.length]); i = f.indexOf(t, i + t.length); } }
+  if (!marks.length || f.length !== String(text).length) return html;
+  marks.sort((a, b) => a[0] - b[0]); const merged = [];
+  for (const m of marks) { const l = merged[merged.length - 1]; if (l && m[0] <= l[1]) l[1] = Math.max(l[1], m[1]); else merged.push([...m]); }
+  let res = '', p = 0; const s = String(text);
+  for (const [a, b] of merged) { res += esc(s.slice(p, a)) + '<mark>' + esc(s.slice(a, b)) + '</mark>'; p = b; }
+  return res + esc(s.slice(p));
+}
+function docRow(d, terms = [], extra = '') {
+  const meta = [];
+  const path = sectionPath(d.section).map((s) => s.name).join(' › ');
+  if (path) meta.push(esc(path));
+  if (d.asset) meta.push('PDF');
+  if ((d.chapters || []).length) meta.push((d.chapters.length) + ' rozdz.');
+  return `<button class="item" type="button" data-act="open-doc" data-id="${d.id}">
+    <span class="type ${esc(d.type || 'INNE')}">${esc(TYPE_SHORT[d.type] || 'INNE')}</span>
+    <span class="body">${d.number ? `<span class="desig">${hl(d.number, terms)}</span>` : ''}
+      <div class="t">${hl(d.title || 'Bez tytułu', terms)}</div>
+      <div class="m">${meta.join(' · ')}</div>${extra}</span>
+    <span class="chev">${ICON.chev}</span></button>`;
+}
+const VIEWS = {};
+VIEWS.lib = {
+  mount(main) {
+    main.innerHTML = `
+      <header class="bar gut"><div class="inner">
+        <div class="mark" aria-hidden="true">PI</div>
+        <div class="grow"><h1>Biblioteka</h1><div class="sub">Normy, akty prawne, warunki techniczne, zeszyty</div></div>
+        <button class="iconbtn" type="button" data-act="settings" aria-label="Ustawienia i kopia zapasowa">${ICON.gear}</button>
+        <button class="iconbtn" type="button" data-act="lib-menu" aria-label="Dodaj">${ICON.plus}</button>
+      </div></header>
+      <div class="gut"><div class="inner">
+        ${noDbNote()}
+        <div class="search">${ICON.search}<input id="q" type="search" placeholder="Szukaj: numer normy, tytuł, rozdział…" autocomplete="off" aria-label="Szukaj w bibliotece"><button class="clear" type="button" data-act="q-clear" aria-label="Wyczyść" hidden>×</button></div>
+        <div id="libContent"></div>
+      </div></div>`;
+    const q = $('#q', main); q.value = S.query;
+    q.addEventListener('input', () => { S.query = q.value; $('[data-act="q-clear"]', main).hidden = !q.value; VIEWS.lib.update(main); });
+    $('[data-act="q-clear"]', main).hidden = !S.query;
+  },
+  update(main) {
+    const box = $('#libContent', main); if (!box) return;
+    if (!S.noDb && (!S.loaded.sections || !S.loaded.docs)) { box.innerHTML = '<div class="label">Wczytywanie</div><div style="display:grid;gap:8px"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>'; return; }
+    const q = S.query.trim();
+    if (q) { box.innerHTML = libSearch(q); return; }
+    const cur = S.libSection && S.sections.find((s) => s.id === S.libSection) ? S.libSection : null;
+    S.libSection = cur;
+    const path = sectionPath(cur);
+    const children = S.sections.filter((s) => (s.parent || null) === cur).sort(byName);
+    const docs = S.docs.filter((d) => (d.section || null) === cur).sort(byNumber);
+    let html = '';
+    if (cur) {
+      html += `<nav class="crumbs" aria-label="Ścieżka"><button type="button" data-act="sec" data-id="">Biblioteka</button>`;
+      path.forEach((s, i) => { html += ` › ${i === path.length - 1 ? `<span class="cur">${esc(s.name)}</span>` : `<button type="button" data-act="sec" data-id="${s.id}">${esc(s.name)}</button>`}`; });
+      html += `</nav>`;
+    }
+    if (children.length) {
+      html += `<div class="label"><span>Działy</span>${cur ? `<button class="btn ghost sm" type="button" data-act="sec-edit" data-id="${cur}">${ICON.edit} Edytuj dział</button>` : ''}</div><div class="list">`;
+      for (const s of children) html += `<button class="item" type="button" data-act="sec" data-id="${s.id}"><span class="folder">${ICON.folder}</span><span class="body"><div class="t">${esc(s.name)}</div>${s.note ? `<div class="m">${esc(s.note)}</div>` : ''}</span><span class="count">${docCount(s.id)}</span><span class="chev">${ICON.chev}</span></button>`;
+      html += `</div>`;
+    } else if (cur) {
+      html += `<div class="label"><span>${esc(path[path.length - 1].name)}</span><button class="btn ghost sm" type="button" data-act="sec-edit" data-id="${cur}">${ICON.edit} Edytuj dział</button></div>`;
+    }
+    if (docs.length) {
+      html += `<div class="label"><span>Dokumenty</span><span class="count">${docs.length}</span></div><div class="list">${docs.map((d) => docRow(d)).join('')}</div>`;
+    }
+    if (!children.length && !docs.length) {
+      html += `<div class="empty" style="margin-top:14px"><h3>${cur ? 'Pusty dział' : 'Pusta biblioteka'}</h3><p>Dodaj dział (np. „Eurokody”) albo dokument z własnym plikiem PDF normy, aktu lub zeszytu technicznego.</p>
+        <div class="row" style="justify-content:center"><button class="btn" type="button" data-act="sec-new">${ICON.folder} Nowy dział</button><button class="btn primary" type="button" data-act="doc-new">${ICON.plus} Dokument</button></div></div>`;
+    } else {
+      html += `<div class="row" style="margin-top:16px"><button class="btn" type="button" data-act="sec-new">${ICON.folder} Nowy dział</button><button class="btn primary" type="button" data-act="doc-new">${ICON.plus} Dokument</button></div>`;
+    }
+    box.innerHTML = html;
+  },
+};
+function libSearch(q) {
+  const terms = fold(q).split(/\s+/).filter(Boolean);
+  const res = [];
+  for (const d of S.docs) {
+    const head = fold([d.number, d.title, d.notes, d.tags].join(' '));
+    const chHits = (d.chapters || []).filter((c) => { const t = fold([c.no, c.title, c.notes].join(' ')); return terms.every((w) => t.includes(w) || head.includes(w)) && terms.some((w) => t.includes(w)); });
+    const headOk = terms.every((w) => head.includes(w));
+    if (headOk || chHits.length) res.push({ d, chHits, score: (headOk ? 2 : 0) + (fold(d.number).includes(terms[0]) ? 3 : 0) });
+  }
+  res.sort((a, b) => b.score - a.score || byNumber(a.d, b.d));
+  if (!res.length) return `<div class="empty" style="margin-top:14px"><h3>Brak wyników</h3><p>Nic nie pasuje do „${esc(q)}”. Szukam w numerach, tytułach, notatkach i rozdziałach.</p></div>`;
+  return `<div class="label"><span>Wyniki</span><span class="count">${res.length}</span></div><div class="list">` +
+    res.map(({ d, chHits }) => docRow(d, terms, chHits.length ? `<ul class="hits">${chHits.slice(0, 4).map((c) => `<li>§ ${hl([c.no, c.title].filter(Boolean).join(' '), terms)}${c.page ? ` · s. ${esc(c.page)}` : ''}</li>`).join('')}</ul>` : '')).join('') + `</div>`;
+}
+
+function sectionOptions(selected, excludeId) {
+  const excl = excludeId ? descendantIds(excludeId) : new Set();
+  const out = [`<option value="">— Biblioteka (główny poziom) —</option>`];
+  const walk = (parent, depth) => {
+    for (const s of S.sections.filter((x) => (x.parent || null) === parent).sort(byName)) {
+      if (excl.has(s.id)) continue;
+      out.push(`<option value="${s.id}" ${s.id === selected ? 'selected' : ''}>${'  '.repeat(depth)}${depth ? '└ ' : ''}${esc(s.name)}</option>`);
+      walk(s.id, depth + 1);
+    }
+  };
+  walk(null, 0); return out.join('');
+}
+
+function openSectionForm(sec) {
+  const isNew = !sec;
+  sec = sec || { name: '', parent: S.libSection || null, note: '' };
+  openSheet(`<h2>${isNew ? 'Nowy dział' : 'Edytuj dział'}</h2><p class="lead">Działy można zagnieżdżać, np. Normy › Eurokody › Beton.</p>
+    <form class="form" id="secForm">
+      <label class="field"><span>Nazwa działu</span><input id="secName" required maxlength="80" value="${esc(sec.name)}" placeholder="np. Eurokody"></label>
+      <label class="field"><span>Dział nadrzędny</span><select id="secParent">${sectionOptions(sec.parent, isNew ? null : sec.id)}</select></label>
+      <label class="field"><span>Opis (opcjonalnie)</span><input id="secNote" maxlength="140" value="${esc(sec.note || '')}"></label>
+      <div class="actions">${isNew ? '' : '<button class="btn danger" type="button" id="secDel">Usuń dział</button><span class="spacer"></span>'}
+        <button class="btn" type="button" data-act="sheet-close">Anuluj</button><button class="btn primary" type="submit">Zapisz</button></div>
+    </form>`, (el) => {
+    $('#secForm', el).onsubmit = async (e) => {
+      e.preventDefault();
+      const data = { name: $('#secName', el).value.trim(), parent: $('#secParent', el).value || null, note: $('#secNote', el).value.trim(), order: sec.order ?? 100 };
+      if (!data.name) return;
+      try { await save(COLS.sections, sec.id, data); closeSheet(); toast(isNew ? 'Dodano dział' : 'Zapisano dział'); } catch (err) { toast(dbErr(err)); }
+    };
+    const del = $('#secDel', el);
+    if (del) del.onclick = async () => {
+      const hasKids = S.sections.some((s) => s.parent === sec.id) || S.docs.some((d) => d.section === sec.id);
+      if (hasKids) { toast('Dział nie jest pusty. Przenieś lub usuń najpierw jego zawartość.'); return; }
+      if (!(await askConfirm('Usunąć dział?', `„${sec.name}” zostanie usunięty.`))) return;
+      try { await remove(COLS.sections, sec.id); S.libSection = sec.parent || null; closeSheet(); toast('Usunięto dział'); } catch (err) { toast(dbErr(err)); }
+    };
+  });
+}
+
+function openDocForm(doc) {
+  const isNew = !doc;
+  doc = doc || { type: 'NORMA', number: '', title: '', section: S.libSection || null, url: '', notes: '', asset: null, chapters: [] };
+  let newFile = null;
+  openSheet(`<h2>${isNew ? 'Nowy dokument' : 'Edytuj dokument'}</h2><p class="lead">Dołącz własny plik PDF albo link do źródła (np. ISAP).</p>
+    <form class="form" id="docForm">
+      <div class="two">
+        <label class="field"><span>Rodzaj</span><select id="dType">${DOC_TYPES.map(([k, v]) => `<option value="${k}" ${doc.type === k ? 'selected' : ''}>${v}</option>`).join('')}</select></label>
+        <label class="field"><span>Oznaczenie / numer</span><input id="dNum" maxlength="80" value="${esc(doc.number)}" placeholder="np. PN-EN 1992-1-1"></label>
+      </div>
+      <label class="field"><span>Tytuł</span><input id="dTitle" required maxlength="240" value="${esc(doc.title)}" placeholder="np. Eurokod 2 – Projektowanie konstrukcji z betonu"></label>
+      <label class="field"><span>Dział</span><select id="dSec">${sectionOptions(doc.section)}</select></label>
+      <label class="field"><span>Link (opcjonalnie)</span><input id="dUrl" type="url" inputmode="url" value="${esc(doc.url || '')}" placeholder="https://isap.sejm.gov.pl/…"></label>
+      <label class="field"><span>Plik PDF ${doc.asset ? '(jest dołączony — wybierz nowy, aby podmienić)' : '(opcjonalnie)'}</span><input id="dFile" type="file" accept="application/pdf"></label>
+      <label class="field"><span>Notatki</span><textarea id="dNotes" placeholder="Zakres, status, najważniejsze wymagania…">${esc(doc.notes || '')}</textarea></label>
+      <div class="actions">${isNew ? '' : '<button class="btn danger" type="button" id="dDel">Usuń</button><span class="spacer"></span>'}
+        <button class="btn" type="button" data-act="sheet-close">Anuluj</button><button class="btn primary" type="submit">Zapisz</button></div>
+    </form>`, (el) => {
+    $('#dFile', el).onchange = (e) => { newFile = e.target.files[0] || null; };
+    $('#docForm', el).onsubmit = async (e) => {
+      e.preventDefault();
+      const data = {
+        type: $('#dType', el).value, number: $('#dNum', el).value.trim(), title: $('#dTitle', el).value.trim(),
+        section: $('#dSec', el).value || null, url: $('#dUrl', el).value.trim(), notes: $('#dNotes', el).value,
+        asset: doc.asset || null, chapters: doc.chapters || [], createdAt: doc.createdAt || Date.now(), updatedAt: Date.now(),
+      };
+      if (!data.title) return;
+      try {
+        if (newFile) {
+          busy(true, 'Wgrywanie PDF', newFile.name, 0.3);
+          const old = data.asset;
+          data.asset = await uploadBlob(newFile, 'application/pdf');
+          data.fileName = newFile.name;
+          if (old) await dropAsset(old);
+        }
+        const id = await save(COLS.docs, doc.id, data);
+        busy(false); closeSheet(); toast(isNew ? 'Dodano dokument' : 'Zapisano');
+        if (isNew) navigate({ name: 'doc', id });
+      } catch (err) { busy(false); toast(dbErr(err)); }
+    };
+    const del = $('#dDel', el);
+    if (del) del.onclick = async () => {
+      if (!(await askConfirm('Usunąć dokument?', `„${doc.title}” razem z plikiem i rozdziałami zostanie usunięty na stałe.`))) return;
+      try { await remove(COLS.docs, doc.id); await dropAsset(doc.asset); closeSheet(); navigate({ name: 'lib' }); toast('Usunięto dokument'); } catch (err) { toast(dbErr(err)); }
+    };
+  });
+}
+
+function openLibMenu() {
+  openSheet(`<h2>Dodaj do biblioteki</h2><p class="lead">${S.libSection ? 'Pozycja trafi do bieżącego działu.' : 'Wybierz, co chcesz dodać.'}</p>
+    <div class="list"><button class="item" type="button" data-act="doc-new"><span class="folder">${ICON.pdf}</span><span class="body"><div class="t">Dokument</div><div class="m">Norma, akt prawny, warunki techniczne, zeszyt</div></span></button>
+    <button class="item" type="button" data-act="sec-new"><span class="folder">${ICON.folder}</span><span class="body"><div class="t">Dział</div><div class="m">Nowa kategoria w drzewie biblioteki</div></span></button></div>`);
+}
+
+// ---------------- DOCUMENT DETAIL ----------------
+VIEWS.doc = {
+  mount(main) { main.innerHTML = '<div id="docView"></div>'; },
+  update(main, r) {
+    const box = $('#docView', main); const d = S.docs.find((x) => x.id === r.id);
+    if (!d) { box.innerHTML = `<header class="bar gut"><div class="inner"><button class="iconbtn" type="button" data-act="back-lib" aria-label="Wstecz">${ICON.back}</button><div class="grow"><h1>Dokument</h1></div></div></header><div class="gut"><div class="inner"><p class="note" style="margin-top:16px">${S.loaded.docs ? 'Ten dokument nie istnieje lub został usunięty.' : 'Wczytywanie…'}</p></div></div>`; return; }
+    const path = sectionPath(d.section).map((s) => s.name).join(' › ') || 'Biblioteka';
+    const ch = (d.chapters || []).slice().sort((a, b) => String(a.no || '').localeCompare(String(b.no || ''), 'pl', { numeric: true }));
+    box.innerHTML = `
+      <header class="bar gut"><div class="inner">
+        <button class="iconbtn" type="button" data-act="back-lib" aria-label="Wstecz">${ICON.back}</button>
+        <div class="grow"><h1>${esc(d.number || d.title)}</h1><div class="sub">${esc(path)}</div></div>
+        <button class="iconbtn" type="button" data-act="doc-edit" data-id="${d.id}" aria-label="Edytuj">${ICON.edit}</button>
+      </div></header>
+      <div class="gut"><div class="inner">
+        <div class="titleblock">
+          <div class="cell-l"><div class="k">Oznaczenie</div><div class="num">${esc(d.number || '—')}</div></div>
+          <div><div class="k">Rodzaj</div><div class="v"><span class="type ${esc(d.type)}">${esc(TYPE_SHORT[d.type] || 'INNE')}</span></div></div>
+          <div class="big"><div class="k">Tytuł</div><h2>${esc(d.title)}</h2></div>
+        </div>
+        <div class="row" style="margin-top:14px">
+          ${d.asset ? `<button class="btn primary" type="button" data-act="pdf-open" data-id="${d.id}">${ICON.pdf} Otwórz PDF</button>` : `<button class="btn" type="button" data-act="doc-edit" data-id="${d.id}">${ICON.pdf} Dołącz PDF</button>`}
+          ${d.url ? `<a class="btn" href="${esc(d.url)}" target="_blank" rel="noopener">${ICON.link} Źródło online</a>` : ''}
+        </div>
+        ${d.notes ? `<div class="label"><span>Notatki</span></div><div class="note prose" style="color:var(--ink)">${esc(d.notes)}</div>` : ''}
+        <div class="label"><span>Rozdziały i zapisy</span><button class="btn ghost sm" type="button" data-act="ch-new" data-id="${d.id}">${ICON.plus} Dodaj</button></div>
+        ${ch.length ? `<div class="list">${ch.map((c) => `<button class="item chap" type="button" data-act="ch-open" data-id="${d.id}" data-ch="${esc(c.id)}">
+            <span class="no">${esc(c.no || '§')}</span><span class="body"><div class="t">${esc(c.title || 'Bez tytułu')}</div>${c.notes ? `<div class="m">${esc(c.notes.slice(0, 120))}${c.notes.length > 120 ? '…' : ''}</div>` : ''}</span>
+            ${c.page ? `<span class="pg">s. ${esc(c.page)}</span>` : ''}<span class="chev">${ICON.chev}</span></button>`).join('')}</div>`
+          : `<div class="empty"><h3>Brak rozdziałów</h3><p>Dodaj rozdziały lub paragrafy z numerem strony w PDF i własną notatką. Będą też przeszukiwane.</p><button class="btn primary" type="button" data-act="ch-new" data-id="${d.id}">${ICON.plus} Dodaj rozdział</button></div>`}
+        ${d.fileName ? `<p class="m" style="color:var(--muted);font-size:13px;margin-top:16px">Plik: ${esc(d.fileName)}</p>` : ''}
+      </div></div>`;
+  },
+};
+function openChapterForm(doc, chId) {
+  const c = (doc.chapters || []).find((x) => x.id === chId) || null;
+  const isNew = !c; const cur = c || { id: 'c' + Date.now().toString(36), no: '', title: '', page: '', notes: '' };
+  openSheet(`<h2>${isNew ? 'Nowy rozdział' : 'Rozdział'}</h2><p class="lead">${esc(doc.number || doc.title)}</p>
+    <form class="form" id="chForm">
+      <div class="two"><label class="field"><span>Nr rozdziału / §</span><input id="cNo" maxlength="30" value="${esc(cur.no)}" placeholder="np. 5.4 lub § 94"></label>
+      <label class="field"><span>Strona w PDF</span><input id="cPage" type="number" min="1" inputmode="numeric" value="${esc(cur.page)}" placeholder="np. 42"></label></div>
+      <label class="field"><span>Tytuł</span><input id="cTitle" maxlength="200" value="${esc(cur.title)}" placeholder="np. Otulina zbrojenia"></label>
+      <label class="field"><span>Notatka / treść</span><textarea id="cNotes" rows="5" placeholder="Najważniejsze wymagania, wartości, tolerancje…">${esc(cur.notes)}</textarea></label>
+      <div class="actions">${isNew ? '' : '<button class="btn danger" type="button" id="cDel">Usuń</button><span class="spacer"></span>'}
+        ${!isNew && doc.asset && cur.page ? `<button class="btn" type="button" id="cGo">${ICON.pdf} Strona ${esc(cur.page)}</button>` : ''}
+        <button class="btn" type="button" data-act="sheet-close">Anuluj</button><button class="btn primary" type="submit">Zapisz</button></div>
+    </form>`, (el) => {
+    $('#chForm', el).onsubmit = async (e) => {
+      e.preventDefault();
+      const item = { id: cur.id, no: $('#cNo', el).value.trim(), title: $('#cTitle', el).value.trim(), page: $('#cPage', el).value.trim(), notes: $('#cNotes', el).value };
+      const list = (doc.chapters || []).filter((x) => x.id !== cur.id).concat(item);
+      try { await patch(COLS.docs, doc.id, { chapters: list, updatedAt: Date.now() }); closeSheet(); toast('Zapisano rozdział'); } catch (err) { toast(dbErr(err)); }
+    };
+    const del = $('#cDel', el);
+    if (del) del.onclick = async () => {
+      if (!(await askConfirm('Usunąć rozdział?', cur.title || cur.no || ''))) return;
+      try { await patch(COLS.docs, doc.id, { chapters: (doc.chapters || []).filter((x) => x.id !== cur.id) }); closeSheet(); } catch (err) { toast(dbErr(err)); }
+    };
+    const go = $('#cGo', el);
+    if (go) go.onclick = () => { closeSheet(); openViewer(doc, parseInt(cur.page, 10) || 1); };
+  });
+}
+
+// ---------------- PDF VIEWER (library) ----------------
+const VW = { pdf: null, zoom: 1, rendered: new Map(), obs: null, ratio: 1.414, token: 0 };
+async function openViewer(doc, page = 1) {
+  const v = $('#viewer');
+  v.innerHTML = `<div class="vbar gut"><div class="inner">
+      <button class="iconbtn" type="button" data-act="viewer-close" aria-label="Zamknij">${ICON.back}</button>
+      <div class="vt">${esc(doc.number ? doc.number + ' – ' : '')}${esc(doc.title)}</div>
+      <span class="pg" id="vPg">…</span>
+      <button class="iconbtn" type="button" data-act="vz" data-z="-1" aria-label="Pomniejsz">${ICON.minus}</button>
+      <button class="iconbtn" type="button" data-act="vz" data-z="1" aria-label="Powiększ">${ICON.plus}</button>
+    </div></div><div id="vscroll"><div class="vpages" id="vPages"><p class="note">Wczytywanie dokumentu…</p></div></div>`;
+  v.hidden = false; document.body.classList.add('locked'); pushHistory({ overlay: 'viewer' });
+  const token = ++VW.token;
+  try {
+    const pdfjsLib = await ensurePdfJs();
+    const buf = await (await fetch(blobUrl(doc.asset))).arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+    if (token !== VW.token) return;
+    VW.pdf = pdf; VW.zoom = 1; VW.rendered = new Map();
+    const p1 = await pdf.getPage(1); const vp = p1.getViewport({ scale: 1 }); VW.ratio = vp.height / vp.width;
+    const pages = $('#vPages'); let html = '';
+    for (let i = 1; i <= pdf.numPages; i++) html += `<div class="vpage" data-p="${i}"><span class="n">${i}</span></div>`;
+    pages.innerHTML = html; layoutViewer();
+    VW.obs = new IntersectionObserver((ents) => { for (const e of ents) if (e.isIntersecting) renderVPage(+e.target.dataset.p); }, { root: $('#vscroll'), rootMargin: '800px 0px' });
+    pages.querySelectorAll('.vpage').forEach((el) => VW.obs.observe(el));
+    const target = pages.querySelector(`[data-p="${Math.min(Math.max(1, page), pdf.numPages)}"]`);
+    if (target) $('#vscroll').scrollTop = target.offsetTop - 8;
+    $('#vscroll').onscroll = updateVPg; updateVPg();
+  } catch (e) {
+    $('#vPages').innerHTML = '<p class="note warn">Nie udało się otworzyć pliku PDF.</p>';
+  }
+}
+function layoutViewer() {
+  const sc = $('#vscroll'); if (!sc) return;
+  const w = Math.min(sc.clientWidth - 24, 1000) * VW.zoom;
+  sc.querySelectorAll('.vpage').forEach((el) => { el.style.width = w + 'px'; el.style.height = (el.dataset.r ? w * el.dataset.r : w * VW.ratio) + 'px'; });
+}
+async function renderVPage(n) {
+  const el = $(`#vPages [data-p="${n}"]`); if (!el || !VW.pdf) return;
+  const key = n + '@' + VW.zoom; if (VW.rendered.get(n) === key) return; VW.rendered.set(n, key);
+  const page = await VW.pdf.getPage(n); const v1 = page.getViewport({ scale: 1 });
+  el.dataset.r = v1.height / v1.width; el.style.height = el.clientWidth * el.dataset.r + 'px';
+  const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+  const vp = page.getViewport({ scale: (el.clientWidth * dpr) / v1.width });
+  const c = document.createElement('canvas'); c.width = Math.round(vp.width); c.height = Math.round(vp.height);
+  await page.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
+  if (VW.rendered.get(n) !== key) return;
+  el.querySelector('canvas')?.remove(); el.prepend(c);
+}
+function updateVPg() {
+  const sc = $('#vscroll'); if (!sc || !VW.pdf) return;
+  const mid = sc.scrollTop + sc.clientHeight / 3; let cur = 1;
+  for (const el of sc.querySelectorAll('.vpage')) { if (el.offsetTop <= mid) cur = +el.dataset.p; else break; }
+  $('#vPg').textContent = cur + ' / ' + VW.pdf.numPages;
+}
+function zoomViewer(dir) {
+  const sc = $('#vscroll'); const frac = sc.scrollTop / Math.max(1, sc.scrollHeight);
+  VW.zoom = Math.min(4, Math.max(0.5, VW.zoom * (dir > 0 ? 1.25 : 0.8)));
+  layoutViewer(); sc.scrollTop = frac * sc.scrollHeight;
+  sc.querySelectorAll('.vpage').forEach((el) => { const r = el.getBoundingClientRect(); if (r.bottom > -800 && r.top < innerHeight + 800) renderVPage(+el.dataset.p); });
+}
+function closeViewer(fromPop) {
+  const v = $('#viewer'); if (v.hidden) return;
+  VW.token++; if (VW.obs) VW.obs.disconnect(); if (VW.pdf) { try { VW.pdf.destroy(); } catch (e) {} } VW.pdf = null;
+  v.hidden = true; v.innerHTML = ''; document.body.classList.remove('locked');
+  if (!fromPop) backQuiet();
+}
+
+// ---------------- PROJECTS LIST ----------------
+function projDefects(pid) { return S.defects.filter((d) => d.project === pid); }
+VIEWS.projects = {
+  mount(main) {
+    main.innerHTML = `<header class="bar gut"><div class="inner"><div class="mark" aria-hidden="true">PI</div>
+      <div class="grow"><h1>Odbiory mieszkań</h1><div class="sub">Usterki na rzutach, raport PDF</div></div>
+      <button class="iconbtn" type="button" data-act="settings" aria-label="Ustawienia i kopia zapasowa">${ICON.gear}</button>
+      <button class="iconbtn" type="button" data-act="proj-new" aria-label="Nowy odbiór">${ICON.plus}</button></div></header>
+      <div class="gut"><div class="inner">${noDbNote()}<div id="projList" style="margin-top:16px"></div></div></div>`;
+  },
+  update(main) {
+    const box = $('#projList', main); if (!box) return;
+    if (!S.noDb && (!S.loaded.projects || !S.loaded.defects)) { box.innerHTML = '<div style="display:grid;gap:8px"><div class="skel"></div><div class="skel"></div></div>'; return; }
+    const list = S.projects.slice().sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+    if (!list.length) {
+      box.innerHTML = `<div class="empty"><h3>Pierwszy odbiór</h3><p>Utwórz mieszkanie, wgraj rzut (PDF lub zdjęcie), a potem dotykaj rzutu, aby zaznaczać usterki ze zdjęciami.</p><button class="btn primary" type="button" data-act="proj-new">${ICON.plus} Nowy odbiór</button></div>`;
+      return;
+    }
+    box.innerHTML = backupReminder() + `<div class="pcards">${list.map((p) => {
+      const ds = projDefects(p.id); const open = ds.filter((d) => d.status !== 'done').length;
+      return `<button class="pcard" type="button" data-act="proj-open" data-id="${p.id}">
+        <div><h3>${esc(p.name)}</h3><div class="m">${esc([p.address, fmtDate(p.date)].filter(Boolean).join(' · '))}</div></div>
+        <div class="stats"><span class="pill">${(p.plans || []).length} ${plural((p.plans || []).length, 'rzut', 'rzuty', 'rzutów')}</span>
+        <span class="pill open">${open} do usunięcia</span><span class="pill done">${ds.length - open} usunięte</span></div></button>`;
+    }).join('')}</div>
+    <div class="row" style="margin-top:16px"><button class="btn primary" type="button" data-act="proj-new">${ICON.plus} Nowy odbiór</button></div>`;
+  },
+};
+function plural(n, one, few, many) { if (n === 1) return one; const d = n % 10, t = n % 100; return d >= 2 && d <= 4 && (t < 12 || t > 14) ? few : many; }
+
+function openProjectForm(p) {
+  const isNew = !p;
+  p = p || { name: '', address: '', developer: '', buyer: '', inspector: '', date: today(), plans: [] };
+  openSheet(`<h2>${isNew ? 'Nowy odbiór' : 'Dane odbioru'}</h2><p class="lead">Te dane trafią na pierwszą stronę raportu.</p>
+    <form class="form" id="pForm">
+      <label class="field"><span>Nazwa lokalu</span><input id="pName" required maxlength="80" value="${esc(p.name)}" placeholder="np. Mieszkanie M12, Osiedle Zielone"></label>
+      <label class="field"><span>Adres</span><input id="pAddr" maxlength="160" value="${esc(p.address)}" placeholder="ul. …, Warszawa"></label>
+      <div class="two"><label class="field"><span>Deweloper</span><input id="pDev" maxlength="120" value="${esc(p.developer)}"></label>
+      <label class="field"><span>Nabywca</span><input id="pBuy" maxlength="120" value="${esc(p.buyer)}"></label></div>
+      <div class="two"><label class="field"><span>Odbierający</span><input id="pIns" maxlength="120" value="${esc(p.inspector)}" placeholder="Imię i nazwisko"></label>
+      <label class="field"><span>Data odbioru</span><input id="pDate" type="date" value="${esc(p.date)}"></label></div>
+      <div class="actions">${isNew ? '' : '<button class="btn danger" type="button" id="pDel">Usuń odbiór</button><span class="spacer"></span>'}
+        <button class="btn" type="button" data-act="sheet-close">Anuluj</button><button class="btn primary" type="submit">${isNew ? 'Utwórz' : 'Zapisz'}</button></div>
+    </form>`, (el) => {
+    $('#pForm', el).onsubmit = async (e) => {
+      e.preventDefault();
+      const data = { ...p, name: $('#pName', el).value.trim(), address: $('#pAddr', el).value.trim(), developer: $('#pDev', el).value.trim(),
+        buyer: $('#pBuy', el).value.trim(), inspector: $('#pIns', el).value.trim(), date: $('#pDate', el).value, plans: p.plans || [], createdAt: p.createdAt || Date.now() };
+      delete data.id;
+      if (!data.name) return;
+      try { const id = await save(COLS.projects, p.id, data); closeSheet(); if (isNew) navigate({ name: 'project', id }); else toast('Zapisano'); } catch (err) { toast(dbErr(err)); }
+    };
+    const del = $('#pDel', el);
+    if (del) del.onclick = async () => {
+      const ds = projDefects(p.id);
+      if (!(await askConfirm('Usunąć cały odbiór?', `„${p.name}”, ${(p.plans || []).length} rzut(y) i ${ds.length} usterek ze zdjęciami zostaną usunięte na stałe.`))) return;
+      busy(true, 'Usuwanie…', '', 0.2);
+      try {
+        for (const d of ds) { for (const ph of d.photos || []) await dropAsset(ph); await remove(COLS.defects, d.id); }
+        for (const pl of p.plans || []) await dropAsset(pl.asset);
+        await remove(COLS.projects, p.id);
+        busy(false); closeSheet(); navigate({ name: 'projects' }); toast('Usunięto odbiór');
+      } catch (err) { busy(false); toast(dbErr(err)); }
+    };
+  });
+}
+
+// ---------------- PROJECT VIEW (plans + pins) ----------------
+VIEWS.project = {
+  mount(main, r) {
+    PV.projectId = r.id; PV.planId = null; PV.adding = false; PV.ghost = null; PV.sel = null; S.lastProject = r.id;
+    main.innerHTML = `
+      <header class="bar gut"><div class="inner">
+        <button class="iconbtn" type="button" data-act="back-projects" aria-label="Wstecz">${ICON.back}</button>
+        <div class="grow"><h1 id="pvTitle">…</h1><div class="sub" id="pvSub"></div></div>
+        <button class="iconbtn" type="button" data-act="proj-edit" aria-label="Dane odbioru">${ICON.dots}</button>
+        <button class="btn accent" type="button" data-act="report">${ICON.report}<span>Raport</span></button>
+      </div></header>
+      <div class="gut"><div class="inner">
+        <div class="plantabs" id="planTabs" role="tablist" aria-label="Rzuty"></div>
+        <div class="stagewrap" id="stageWrap">
+          <div class="stage" id="stage"><div class="world" id="world"><img id="planImg" alt="Rzut lokalu"><div id="pins"></div></div></div>
+          <div class="hint" id="hint" hidden>Dotknij miejsca na rzucie, aby wstawić usterkę</div>
+          <div class="tools" id="tools">
+            <button class="iconbtn" type="button" data-act="pz" data-z="1" aria-label="Powiększ">${ICON.plus}</button>
+            <button class="iconbtn" type="button" data-act="pz" data-z="-1" aria-label="Pomniejsz">${ICON.minus}</button>
+            <button class="iconbtn" type="button" data-act="pfit" aria-label="Dopasuj">${ICON.fit}</button>
+          </div>
+          <button class="btn addfab" type="button" data-act="add-mode" id="addFab">${ICON.pin}<span>Dodaj usterkę</span></button>
+          <div class="stage-empty" id="stageEmpty" hidden><div><h3>Wgraj rzut lokalu</h3><p>PDF (każda strona = osobny rzut) albo zdjęcie rzutu. Przy dużych mieszkaniach dodaj kilka rzutów.</p><button class="btn primary" type="button" data-act="plan-new">${ICON.plus} Dodaj rzut</button></div></div>
+        </div>
+        <div class="label"><span id="dHead">Usterki</span><span class="seg" role="group" aria-label="Filtr"><button type="button" data-act="dfilter" data-f="plan">Ten rzut</button><button type="button" data-act="dfilter" data-f="all">Wszystkie</button></span></div>
+        <div id="dList"></div>
+      </div></div>`;
+    bindStage();
+  },
+  update(main, r) {
+    const p = S.projects.find((x) => x.id === r.id);
+    if (!p) {
+      $('#pvTitle').textContent = S.loaded.projects ? 'Nie znaleziono' : 'Wczytywanie…';
+      $('#stageEmpty').hidden = true; return;
+    }
+    $('#pvTitle').textContent = p.name;
+    $('#pvSub').textContent = [p.address, fmtDate(p.date)].filter(Boolean).join(' · ');
+    const plans = p.plans || [];
+    if (!plans.find((x) => x.id === PV.planId)) setPlan(plans[0] || null);
+    $('#planTabs').innerHTML = plans.map((pl) => {
+      const n = projDefects(p.id).filter((d) => d.plan === pl.id).length;
+      return `<button class="chip" type="button" role="tab" aria-pressed="${pl.id === PV.planId}" data-act="plan-sel" data-id="${pl.id}">${esc(pl.name)}${n ? ` <span class="count">${n}</span>` : ''}</button>`;
+    }).join('') + `<button class="chip add" type="button" data-act="plan-new">${ICON.plus.replace('<svg', '<svg width="16" height="16"')} Rzut</button>`
+      + (PV.planId ? `<button class="chip" type="button" data-act="plan-edit" aria-label="Edytuj rzut">${ICON.edit.replace('<svg', '<svg width="16" height="16"')}</button>` : '');
+    $('#stageEmpty').hidden = !!plans.length;
+    $('#tools').hidden = !plans.length; $('#addFab').hidden = !plans.length;
+    const movingDef = PV.moving && S.defects.find((x) => x.id === PV.moving);
+    if (PV.moving && !movingDef) PV.moving = null;
+    $('#stageWrap').classList.toggle('adding', PV.adding || !!PV.moving);
+    $('#hint').hidden = !(PV.adding || PV.moving);
+    $('#hint').textContent = PV.moving ? `Dotknij nowego miejsca dla usterki nr ${movingDef.number}` : 'Dotknij miejsca na rzucie, aby wstawić usterkę';
+    $('#addFab').querySelector('span').textContent = PV.moving ? 'Anuluj przesuwanie' : PV.adding ? 'Anuluj dodawanie' : 'Dodaj usterkę';
+    renderPins(); renderDefectList(p);
+  },
+};
+function curProject() { return S.projects.find((x) => x.id === PV.projectId); }
+function curPlan() { const p = curProject(); return p && (p.plans || []).find((x) => x.id === PV.planId); }
+
+function setPlan(pl) {
+  PV.planId = pl ? pl.id : null; PV.ghost = null;
+  const world = $('#world'), img = $('#planImg'); if (!world) return;
+  if (!pl) { img.removeAttribute('src'); world.style.width = world.style.height = '0px'; return; }
+  world.style.width = pl.w + 'px'; world.style.height = pl.h + 'px';
+  img.src = blobUrl(pl.asset);
+  requestAnimationFrame(fitPlan);
+}
+function fitPlan() {
+  const pl = curPlan(); const st = $('#stage'); if (!pl || !st) return;
+  const W = st.clientWidth, H = st.clientHeight; const pad = 16;
+  PV.s = Math.min((W - pad * 2) / pl.w, (H - pad * 2 - 50) / pl.h);
+  PV.tx = (W - pl.w * PV.s) / 2; PV.ty = (H - 50 - pl.h * PV.s) / 2 + 0;
+  applyTransform();
+}
+function applyTransform() {
+  const w = $('#world'); if (!w) return;
+  w.style.transform = `translate(${PV.tx}px, ${PV.ty}px) scale(${PV.s})`;
+  w.style.setProperty('--inv', (1 / PV.s).toString());
+}
+function zoomAt(factor, cx, cy) {
+  const pl = curPlan(); if (!pl) return;
+  const st = $('#stage'); const W = st.clientWidth;
+  const minS = Math.min(0.05, (W / pl.w) * 0.5); const s2 = Math.min(8, Math.max(minS, PV.s * factor));
+  const k = s2 / PV.s; PV.tx = cx - (cx - PV.tx) * k; PV.ty = cy - (cy - PV.ty) * k; PV.s = s2; applyTransform();
+}
+function centerOn(x, y) {
+  const pl = curPlan(); const st = $('#stage'); if (!pl) return;
+  const fit = Math.min(st.clientWidth / pl.w, st.clientHeight / pl.h);
+  if (PV.s < fit * 2) PV.s = fit * 2.2;
+  PV.tx = st.clientWidth / 2 - x * pl.w * PV.s; PV.ty = st.clientHeight / 2.4 - y * pl.h * PV.s; applyTransform();
+}
+function bindStage() {
+  const st = $('#stage'); const pts = new Map(); let start = null, pinch = null, moved = 0;
+  st.addEventListener('pointerdown', (e) => {
+    st.setPointerCapture(e.pointerId); pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pts.size === 1) { start = { x: e.clientX, y: e.clientY, t: Date.now() }; moved = 0; }
+    if (pts.size === 2) { const [a, b] = [...pts.values()]; pinch = { d: Math.hypot(a.x - b.x, a.y - b.y) }; moved = 99; }
+  });
+  st.addEventListener('pointermove', (e) => {
+    const prev = pts.get(e.pointerId); if (!prev) return;
+    const cur = { x: e.clientX, y: e.clientY }; pts.set(e.pointerId, cur);
+    if (pts.size === 1) {
+      PV.tx += cur.x - prev.x; PV.ty += cur.y - prev.y; moved += Math.abs(cur.x - prev.x) + Math.abs(cur.y - prev.y); applyTransform();
+    } else if (pts.size === 2 && pinch) {
+      const [a, b] = [...pts.values()]; const d = Math.hypot(a.x - b.x, a.y - b.y);
+      const r = st.getBoundingClientRect(); const cx = (a.x + b.x) / 2 - r.left, cy = (a.y + b.y) / 2 - r.top;
+      // Pan by centroid movement of this pointer, then scale around centroid.
+      PV.tx += (cur.x - prev.x) / 2; PV.ty += (cur.y - prev.y) / 2;
+      zoomAt(d / pinch.d, cx, cy); pinch.d = d;
+    }
+  });
+  const end = (e) => {
+    const had = pts.has(e.pointerId); pts.delete(e.pointerId); if (pts.size < 2) pinch = null;
+    if (!had || pts.size > 0 || !start) return;
+    const isTap = moved < 10 && Date.now() - start.t < 600 && e.type === 'pointerup';
+    start = null; if (isTap) onStageTap(e.clientX, e.clientY);
+  };
+  st.addEventListener('pointerup', end); st.addEventListener('pointercancel', end);
+  st.addEventListener('wheel', (e) => { e.preventDefault(); const r = st.getBoundingClientRect(); zoomAt(e.deltaY < 0 ? 1.15 : 1 / 1.15, e.clientX - r.left, e.clientY - r.top); }, { passive: false });
+}
+window.addEventListener('resize', () => { if (S.route.name === 'project') fitPlan(); });
+function onStageTap(cx, cy) {
+  const pl = curPlan(); if (!pl) return;
+  const r = $('#stage').getBoundingClientRect();
+  const x = (cx - r.left - PV.tx) / PV.s / pl.w, y = (cy - r.top - PV.ty) / PV.s / pl.h;
+  const inside = x >= 0 && y >= 0 && x <= 1 && y <= 1;
+  if (PV.moving) {
+    // Move mode: the tap sets the new position of the selected defect.
+    if (!inside) { toast('Dotknij w obrębie rzutu'); return; }
+    const d = S.defects.find((q) => q.id === PV.moving); PV.moving = null; PV.sel = null; render();
+    if (d) patch(COLS.defects, d.id, { x, y, updatedAt: Date.now() }).then(() => toast(`Przeniesiono punkt nr ${d.number}`)).catch((err) => toast(dbErr(err)));
+    return;
+  }
+  if (!PV.adding) {
+    // Pointer capture redirects the event target to the stage, so hit-test pins by position.
+    const hit = document.elementsFromPoint(cx, cy).find((el) => el.closest && el.closest('.pin[data-id]'));
+    if (hit) { const d = S.defects.find((q) => q.id === hit.closest('.pin').dataset.id); if (d) openDefectForm(d); }
+    return;
+  }
+  if (!inside) { toast('Dotknij w obrębie rzutu'); return; }
+  PV.adding = false; PV.ghost = { x, y }; render();
+  openDefectForm(null, { x, y });
+}
+function renderPins() {
+  const box = $('#pins'); if (!box) return;
+  const ds = S.defects.filter((d) => d.project === PV.projectId && d.plan === PV.planId);
+  let html = ds.map((d) => `<div class="pin ${d.status === 'done' ? 'done' : ''} ${PV.sel === d.id || PV.moving === d.id ? 'sel' : ''}" data-id="${d.id}" style="left:${d.x * 100}%;top:${d.y * 100}%"><span><b><i>${d.number}</i></b></span></div>`).join('');
+  if (PV.ghost) html += `<div class="pin ghost" style="left:${PV.ghost.x * 100}%;top:${PV.ghost.y * 100}%"><span><b><i>+</i></b></span></div>`;
+  box.innerHTML = html;
+}
+function renderDefectList(p) {
+  const all = projDefects(p.id).sort((a, b) => a.number - b.number);
+  const list = PV.filter === 'plan' ? all.filter((d) => d.plan === PV.planId) : all;
+  const open = all.filter((d) => d.status !== 'done').length;
+  $('#dHead').textContent = `Usterki · ${open} otwartych z ${all.length}`;
+  document.querySelectorAll('[data-act="dfilter"]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.f === PV.filter)));
+  const plans = Object.fromEntries((p.plans || []).map((x) => [x.id, x.name]));
+  $('#dList').innerHTML = list.length ? `<div class="list">${list.map((d) => `<button class="drow" type="button" data-act="def-open" data-id="${d.id}">
+      <span class="dnum ${d.status === 'done' ? 'done' : ''}">${d.number}</span>
+      <span class="body" style="flex:1;min-width:0"><div class="t" style="font-weight:600">${esc(d.room || 'Bez lokalizacji')}${d.category ? ` · <span style="font-weight:500;color:var(--muted)">${esc(d.category)}</span>` : ''}</div>
+      <div style="font-size:14px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(d.description || '—')}</div>
+      ${PV.filter === 'all' ? `<div style="font-size:12px;color:var(--muted)">${esc(plans[d.plan] || '')}</div>` : ''}</span>
+      ${(d.photos || [])[0] ? `<img class="thumb" src="${blobUrl(d.photos[0])}" alt="" loading="lazy">` : ''}</button>`).join('')}</div>`
+    : `<p class="note">${(p.plans || []).length ? 'Brak usterek. Naciśnij „Dodaj usterkę”, a potem dotknij miejsca na rzucie.' : 'Najpierw dodaj rzut lokalu.'}</p>`;
+}
+
+function openPlanForm(pl) {
+  const p = curProject(); if (!p) return;
+  const isNew = !pl; let file = null;
+  openSheet(`<h2>${isNew ? 'Dodaj rzut' : 'Edytuj rzut'}</h2><p class="lead">${isNew ? 'PDF z kilkoma stronami doda każdą stronę jako osobny rzut.' : 'Zmień nazwę lub usuń rzut.'}</p>
+    <form class="form" id="plForm">
+      <label class="field"><span>Nazwa rzutu</span><input id="plName" maxlength="60" value="${esc(pl ? pl.name : (p.plans || []).length ? 'Rzut ' + ((p.plans || []).length + 1) : 'Rzut lokalu')}" placeholder="np. Parter, Piętro, Antresola"></label>
+      ${isNew ? `<label class="field"><span>Plik: PDF lub zdjęcie / obraz</span><input id="plFile" type="file" accept="application/pdf,image/*" required></label>` : ''}
+      <div class="actions">${isNew ? '' : '<button class="btn danger" type="button" id="plDel">Usuń rzut</button><span class="spacer"></span>'}
+        <button class="btn" type="button" data-act="sheet-close">Anuluj</button><button class="btn primary" type="submit">${isNew ? 'Wgraj' : 'Zapisz'}</button></div>
+    </form>`, (el) => {
+    const f = $('#plFile', el); if (f) f.onchange = (e) => { file = e.target.files[0] || null; };
+    $('#plForm', el).onsubmit = async (e) => {
+      e.preventDefault();
+      const name = $('#plName', el).value.trim() || 'Rzut';
+      const fresh = curProject();
+      if (!isNew) {
+        try { await patch(COLS.projects, fresh.id, { plans: fresh.plans.map((x) => x.id === pl.id ? { ...x, name } : x) }); closeSheet(); } catch (err) { toast(dbErr(err)); }
+        return;
+      }
+      if (!file) return;
+      try {
+        busy(true, 'Przygotowanie rzutu', file.name, 0.05);
+        let images;
+        if (file.type === 'application/pdf' || /\.pdf$/i.test(file.name)) {
+          images = await pdfToImages(file, (i, n) => busy(true, 'Przetwarzanie PDF', `Strona ${i} z ${n}`, (i - 1) / n * 0.6));
+        } else {
+          images = [await toJpeg(file, 3200, 0.9)];
+        }
+        const added = [];
+        for (let i = 0; i < images.length; i++) {
+          busy(true, 'Wgrywanie', `Rzut ${i + 1} z ${images.length}`, 0.6 + 0.4 * (i / images.length));
+          const asset = await uploadBlob(images[i].blob, 'image/jpeg');
+          added.push({ id: 'pl' + Date.now().toString(36) + i, name: images.length > 1 ? `${name} – str. ${i + 1}` : name, asset, w: images[i].w, h: images[i].h });
+        }
+        const latest = curProject();
+        await patch(COLS.projects, latest.id, { plans: (latest.plans || []).concat(added) });
+        busy(false); closeSheet(); PV.planId = null; setPlan(added[0]); render();
+        toast(added.length > 1 ? `Dodano ${added.length} rzuty` : 'Dodano rzut');
+      } catch (err) { busy(false); toast(err && err.code ? dbErr(err) : 'Nie udało się odczytać pliku.'); }
+    };
+    const del = $('#plDel', el);
+    if (del) del.onclick = async () => {
+      const ds = S.defects.filter((d) => d.project === p.id && d.plan === pl.id);
+      if (!(await askConfirm('Usunąć rzut?', `„${pl.name}” i ${ds.length} usterek na nim zostanie usuniętych na stałe.`))) return;
+      try {
+        busy(true, 'Usuwanie…', '', 0.3);
+        for (const d of ds) { for (const ph of d.photos || []) await dropAsset(ph); await remove(COLS.defects, d.id); }
+        const latest = curProject();
+        await patch(COLS.projects, latest.id, { plans: latest.plans.filter((x) => x.id !== pl.id) });
+        await dropAsset(pl.asset);
+        busy(false); closeSheet(); PV.planId = null; render();
+      } catch (err) { busy(false); toast(dbErr(err)); }
+    };
+  });
+}
+
+// ---------------- DEFECT FORM ----------------
+function openDefectForm(d, pos) {
+  const p = curProject(); if (!p) return;
+  const isNew = !d;
+  const nextNo = projDefects(p.id).reduce((m, x) => Math.max(m, x.number || 0), 0) + 1;
+  const base = d || { number: nextNo, room: '', category: '', description: '', status: 'open', photos: [], x: pos.x, y: pos.y, plan: PV.planId, project: p.id };
+  const original = (base.photos || []).slice();
+  const photos = original.slice(); const uploaded = new Set(); let pending = 0; let saved = false;
+  PV.sel = d ? d.id : null; if (d) { if (d.plan !== PV.planId) setPlan((p.plans || []).find((x) => x.id === d.plan)); renderPins(); centerOn(d.x, d.y); }
+  const planName = ((p.plans || []).find((x) => x.id === base.plan) || {}).name || '';
+  openSheet(`
+    <div class="sheet-tb"><div><span class="dnum ${base.status === 'done' ? 'done' : ''}" style="width:44px;height:44px;font-size:16px">${base.number}</span></div>
+      <div><div style="font:600 10.5px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">Usterka · ${esc(planName)}</div><h2 style="margin:2px 0 0">${isNew ? 'Nowa usterka' : 'Usterka nr ' + base.number}</h2></div></div>
+    <form class="form" id="defForm">
+      <div class="two">
+        <label class="field"><span>Pomieszczenie</span><input id="fRoom" list="roomList" maxlength="60" value="${esc(base.room)}" placeholder="np. Łazienka"><datalist id="roomList">${ROOMS.map((r) => `<option value="${r}">`).join('')}</datalist></label>
+        <label class="field"><span>Kategoria</span><select id="fCat"><option value="">— wybierz —</option>${CATEGORIES.map((c) => `<option ${c === base.category ? 'selected' : ''}>${c}</option>`).join('')}</select></label>
+      </div>
+      <label class="field"><span>Czego dotyczy usterka</span><textarea id="fDesc" rows="4" placeholder="np. Rysa na tynku nad ościeżnicą, dł. ok. 40 cm">${esc(base.description)}</textarea></label>
+      <div class="field"><span>Szybkie opisy · dotknij, aby wstawić</span><div class="phrases" id="fPhr"></div>
+        <div><button class="btn ghost sm" type="button" id="fPhrSave">${ICON.plus.replace('<svg', '<svg width="16" height="16"')} Zapisz wpisany opis jako szybki</button></div></div>
+      <div class="field"><span>Status</span><span class="seg" role="group"><button type="button" data-st="open" aria-pressed="${base.status !== 'done'}">Do usunięcia</button><button type="button" data-st="done" aria-pressed="${base.status === 'done'}">Usunięta</button></span></div>
+      <div class="field"><span>Zdjęcia</span><div class="photos" id="fPhotos"></div>
+        <div class="row"><button class="btn" type="button" id="fCam">${ICON.cam} Zrób zdjęcie</button><button class="btn" type="button" id="fGal">${ICON.img} Z galerii</button></div></div>
+      <div class="actions">${isNew ? '' : `<button class="btn danger" type="button" id="fDel">Usuń</button><button class="btn" type="button" id="fMove">${ICON.pin} Przesuń punkt</button><span class="spacer"></span>`}
+        <button class="btn" type="button" data-act="sheet-close">Anuluj</button><button class="btn primary" type="submit" id="fSave">Zapisz</button></div>
+    </form>`, (el) => {
+    let status = base.status || 'open';
+    el.querySelectorAll('[data-st]').forEach((b) => b.onclick = () => { status = b.dataset.st; el.querySelectorAll('[data-st]').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); });
+    const drawPhotos = () => {
+      $('#fPhotos', el).innerHTML = photos.map((id, i) => `<div class="photo"><img src="${blobUrl(id)}" alt="Zdjęcie ${i + 1}"><button class="ann" type="button" data-ann="${i}" aria-label="Rysuj na zdjęciu ${i + 1}"></button><span class="pen">✎ rysuj</span><button class="x" type="button" data-rm="${i}" aria-label="Usuń zdjęcie">×</button></div>`).join('')
+        + Array.from({ length: pending }, () => '<div class="photo loading">Wgrywanie…</div>').join('');
+      $('#fSave', el).disabled = pending > 0;
+    };
+    drawPhotos();
+    $('#fPhotos', el).onclick = async (e) => {
+      const rm = e.target.closest('[data-rm]');
+      if (rm) { photos.splice(+rm.dataset.rm, 1); drawPhotos(); return; }
+      const an = e.target.closest('[data-ann]'); if (!an) return;
+      const idx = +an.dataset.ann; const oldId = photos[idx];
+      const blob = await openAnnotator(blobUrl(oldId)); if (!blob) return;
+      pending++; drawPhotos();
+      try {
+        const nid = await uploadBlob(blob, 'image/jpeg'); uploaded.add(nid);
+        const at = photos.indexOf(oldId); if (at >= 0) photos[at] = nid; else photos.push(nid);
+        // A photo uploaded during this edit is no longer referenced anywhere: drop it now.
+        if (uploaded.has(oldId)) { uploaded.delete(oldId); dropAsset(oldId); }
+      } catch (err) { toast(dbErr(err)); }
+      pending--; if ($('#fPhotos', el)) drawPhotos();
+    };
+    // Quick phrases
+    const descEl = $('#fDesc', el), catEl = $('#fCat', el);
+    const drawPhr = () => {
+      const cat = catEl.value;
+      const own = ownPhrases().filter((o) => !cat || !o.cat || o.cat === cat);
+      const builtIn = cat ? (PHRASES[cat] || []).map((t) => ({ t, cat })) : Object.entries(PHRASES).filter(([k]) => k !== 'Inne').map(([k, v]) => ({ t: v[0], cat: k }));
+      $('#fPhr', el).innerHTML = own.map((o) => `<span class="phr-own"><button class="phr" type="button" data-pt="${esc(o.t)}" data-pc="${esc(o.cat || '')}">${esc(o.t)}</button><button class="rm" type="button" data-prm="${esc(o.t)}" aria-label="Usuń szybki opis">×</button></span>`).join('')
+        + builtIn.map((o) => `<button class="phr" type="button" data-pt="${esc(o.t)}" data-pc="${esc(o.cat)}">${esc(o.t)}</button>`).join('');
+    };
+    drawPhr(); catEl.addEventListener('change', drawPhr);
+    $('#fPhr', el).onclick = async (e) => {
+      const rmb = e.target.closest('[data-prm]');
+      if (rmb) {
+        const items = ownPhrases().filter((o) => o.t !== rmb.dataset.prm);
+        try { await save(COLS.settings, 'phrases', { items }); toast('Usunięto szybki opis'); drawPhr(); } catch (err) { toast(dbErr(err)); }
+        return;
+      }
+      const b = e.target.closest('[data-pt]'); if (!b) return;
+      const t = b.dataset.pt; const cur = descEl.value.trim();
+      descEl.value = cur ? cur.replace(/[.;,\s]*$/, '') + '; ' + t.charAt(0).toLowerCase() + t.slice(1) : t;
+      if (!catEl.value && b.dataset.pc) { catEl.value = b.dataset.pc; drawPhr(); }
+    };
+    $('#fPhrSave', el).onclick = async () => {
+      const t = descEl.value.trim();
+      if (!t) { toast('Najpierw wpisz opis usterki.'); return; }
+      if (t.length > 140) { toast('Szybki opis może mieć maksymalnie 140 znaków.'); return; }
+      const items = ownPhrases();
+      if (items.some((o) => o.t === t)) { toast('Ten opis już jest na liście.'); return; }
+      try { await save(COLS.settings, 'phrases', { items: items.concat({ t, cat: catEl.value || '' }) }); toast('Dodano do szybkich opisów'); setTimeout(drawPhr, 300); } catch (err) { toast(dbErr(err)); }
+    };
+    let moveAfterSave = false;
+    const mv = $('#fMove', el);
+    if (mv) mv.onclick = () => { moveAfterSave = true; $('#defForm', el).requestSubmit(); };
+    const pick = (inputId) => {
+      const inp = $(inputId); inp.value = '';
+      inp.onchange = async () => {
+        const files = [...inp.files]; if (!files.length) return;
+        if (!S.assets) { toast(dbErr({ code: 'no_assets' })); return; }
+        pending += files.length; drawPhotos();
+        for (const f of files) {
+          try { const { blob } = await toJpeg(f, 1600, 0.82); const id = await uploadBlob(blob, 'image/jpeg'); photos.push(id); uploaded.add(id); }
+          catch (err) { toast(err && err.code ? dbErr(err) : 'Nie udało się odczytać zdjęcia.'); }
+          pending--; if ($('#fPhotos', el)) drawPhotos();
+        }
+      };
+      inp.click();
+    };
+    $('#fCam', el).onclick = () => pick('#fileCam');
+    $('#fGal', el).onclick = () => pick('#fileGal');
+    $('#defForm', el).onsubmit = async (e) => {
+      e.preventDefault(); if (pending) return;
+      const data = { ...base, room: $('#fRoom', el).value.trim(), category: $('#fCat', el).value, description: $('#fDesc', el).value.trim(), status, photos: photos.slice(), updatedAt: Date.now(), createdAt: base.createdAt || Date.now() };
+      delete data.id;
+      try {
+        await save(COLS.defects, d && d.id, data); saved = true;
+        for (const id of original) if (!photos.includes(id)) await dropAsset(id);
+        PV.ghost = null; closeSheet();
+        if (moveAfterSave && d) { PV.moving = d.id; PV.adding = false; PV.sel = d.id; render(); toast('Dotknij nowego miejsca na rzucie'); }
+        else toast(isNew ? `Zapisano usterkę nr ${data.number}` : 'Zapisano');
+      } catch (err) { toast(dbErr(err)); }
+    };
+    const del = $('#fDel', el);
+    if (del) del.onclick = async () => {
+      if (!(await askConfirm(`Usunąć usterkę nr ${base.number}?`, 'Opis i zdjęcia zostaną usunięte na stałe.'))) return;
+      try { await remove(COLS.defects, d.id); saved = true; for (const id of new Set([...original, ...photos])) await dropAsset(id); closeSheet(); toast('Usunięto usterkę'); } catch (err) { toast(dbErr(err)); }
+    };
+  }, () => {
+    // On close without saving: discard photos uploaded during this edit.
+    if (!saved) for (const id of uploaded) dropAsset(id);
+    PV.ghost = null; if (!PV.moving) PV.sel = null; renderPins();
+  });
+}
+
+// ---------------- PHOTO ANNOTATOR ----------------
+function openAnnotator(src) {
+  return new Promise(async (resolve) => {
+    const ov = document.createElement('div'); ov.id = 'annot'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-label', 'Rysowanie na zdjęciu');
+    ov.innerHTML = `<div class="abar">
+        <button class="abtn" type="button" data-a="cancel">Anuluj</button><span class="sp"></span>
+        <button class="abtn" type="button" data-a="undo">Cofnij</button>
+        <button class="abtn save" type="button" data-a="save">Zapisz</button></div>
+      <div class="acv"><canvas aria-label="Zdjęcie do oznaczenia"></canvas></div>
+      <div class="abar">
+        <button class="abtn" type="button" data-tool="arrow" aria-pressed="true">↗ Strzałka</button>
+        <button class="abtn" type="button" data-tool="circle" aria-pressed="false">◯ Kółko</button>
+        <button class="abtn" type="button" data-tool="pen" aria-pressed="false">✎ Pisak</button><span class="sp"></span>
+        <button class="sw" type="button" data-color="#e53935" aria-label="Czerwony" aria-pressed="true" style="background:#e53935"></button>
+        <button class="sw" type="button" data-color="#ffd400" aria-label="Żółty" aria-pressed="false" style="background:#ffd400"></button>
+        <button class="sw" type="button" data-color="#ffffff" aria-label="Biały" aria-pressed="false" style="background:#ffffff"></button></div>`;
+    document.body.appendChild(ov); document.body.classList.add('locked');
+    const finish = (val) => { ov.remove(); if ($('#sheet').hidden) document.body.classList.remove('locked'); resolve(val); };
+    const img = await loadImg(src);
+    if (!img) { toast('Nie udało się wczytać zdjęcia.'); finish(null); return; }
+    const c = $('canvas', ov); c.width = img.naturalWidth; c.height = img.naturalHeight; const g = c.getContext('2d');
+    const lw = Math.max(4, Math.round(Math.max(c.width, c.height) / 170));
+    let tool = 'arrow', color = '#e53935', cur = null; const shapes = [];
+    const drawShape = (sh) => {
+      g.save(); g.strokeStyle = sh.color; g.fillStyle = sh.color; g.lineWidth = lw; g.lineCap = 'round'; g.lineJoin = 'round';
+      g.shadowColor = 'rgba(0,0,0,.5)'; g.shadowBlur = lw * 1.2;
+      const [a, b] = [sh.pts[0], sh.pts[sh.pts.length - 1]];
+      g.beginPath();
+      if (sh.type === 'arrow') {
+        const ang = Math.atan2(b.y - a.y, b.x - a.x), hl = lw * 4.5;
+        g.moveTo(a.x, a.y); g.lineTo(b.x, b.y); g.stroke();
+        g.beginPath(); g.moveTo(b.x, b.y);
+        g.lineTo(b.x - hl * Math.cos(ang - 0.45), b.y - hl * Math.sin(ang - 0.45));
+        g.lineTo(b.x - hl * Math.cos(ang + 0.45), b.y - hl * Math.sin(ang + 0.45)); g.closePath(); g.fill();
+      } else if (sh.type === 'circle') {
+        g.ellipse((a.x + b.x) / 2, (a.y + b.y) / 2, Math.max(2, Math.abs(b.x - a.x) / 2), Math.max(2, Math.abs(b.y - a.y) / 2), 0, 0, Math.PI * 2); g.stroke();
+      } else {
+        sh.pts.forEach((q, k) => (k ? g.lineTo(q.x, q.y) : g.moveTo(q.x, q.y))); g.stroke();
+      }
+      g.restore();
+    };
+    const redraw = () => { g.drawImage(img, 0, 0); shapes.forEach(drawShape); if (cur) drawShape(cur); };
+    redraw();
+    const pos = (e) => { const r = c.getBoundingClientRect(); return { x: (e.clientX - r.left) * c.width / r.width, y: (e.clientY - r.top) * c.height / r.height }; };
+    c.addEventListener('pointerdown', (e) => { c.setPointerCapture(e.pointerId); cur = { type: tool, color, pts: [pos(e)] }; });
+    c.addEventListener('pointermove', (e) => { if (!cur) return; const q = pos(e); if (tool === 'pen') cur.pts.push(q); else cur.pts[1] = q; redraw(); });
+    const up = () => { if (cur && cur.pts.length > 1) shapes.push(cur); cur = null; redraw(); };
+    c.addEventListener('pointerup', up); c.addEventListener('pointercancel', up);
+    ov.addEventListener('click', (e) => {
+      const t = e.target.closest('[data-tool]'), co = e.target.closest('[data-color]'), a = e.target.closest('[data-a]');
+      if (t) { tool = t.dataset.tool; ov.querySelectorAll('[data-tool]').forEach((x) => x.setAttribute('aria-pressed', String(x === t))); }
+      if (co) { color = co.dataset.color; ov.querySelectorAll('[data-color]').forEach((x) => x.setAttribute('aria-pressed', String(x === co))); }
+      if (!a) return;
+      if (a.dataset.a === 'undo') { shapes.pop(); redraw(); }
+      if (a.dataset.a === 'cancel') finish(null);
+      if (a.dataset.a === 'save') {
+        if (!shapes.length) { finish(null); return; }
+        c.toBlob((b) => finish(b), 'image/jpeg', 0.86);
+      }
+    });
+  });
+}
+
+// =====================================================================
+// PDF REPORT (drawn on A4 canvases → JPEG pages → MiniPdf → share / save)
+// =====================================================================
+const A4 = { w: 1240, h: 1754, m: 80 };
+const RC = { ink: '#17222b', muted: '#5b6a72', line: '#c9d2d4', accent: '#e5a019', ok: '#3fae6c', soft: '#f1f4f3' };
+function font(g, weight, size, fam) { g.font = `${weight} ${size}px ${fam === 'mono' ? '"JetBrains Mono", monospace' : fam === 'cond' ? '"Barlow Condensed", "Arial Narrow", sans-serif' : 'Barlow, Arial, sans-serif'}`; }
+function wrap(g, text, maxW) {
+  const out = [];
+  for (const para of String(text || '').split('\n')) {
+    let line = '';
+    for (const word of para.split(/\s+/)) {
+      const t = line ? line + ' ' + word : word;
+      if (g.measureText(t).width > maxW && line) { out.push(line); line = word; } else line = t;
+    }
+    out.push(line);
+  }
+  return out;
+}
+function drawContain(g, img, x, y, w, h, crop) {
+  const sx = crop ? crop.x : 0, sy = crop ? crop.y : 0, sw = crop ? crop.w : img.width, sh = crop ? crop.h : img.height;
+  const k = Math.min(w / sw, h / sh); const dw = sw * k, dh = sh * k; const dx = x + (w - dw) / 2, dy = y + (h - dh) / 2;
+  g.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh); return { dx, dy, k };
+}
+function drawPin(g, x, y, n, done, r = 22) {
+  g.save(); g.translate(x, y);
+  g.beginPath(); g.moveTo(0, 0); g.bezierCurveTo(-r * 0.4, -r * 0.9, -r, -r * 1.2, -r, -r * 1.9); g.arc(0, -r * 1.9, r, Math.PI, 0); g.bezierCurveTo(r, -r * 1.2, r * 0.4, -r * 0.9, 0, 0); g.closePath();
+  g.fillStyle = done ? RC.ok : RC.accent; g.fill(); g.lineWidth = 3; g.strokeStyle = '#1b1b1b'; g.stroke();
+  font(g, 700, Math.round(r * 0.95), 'mono'); g.fillStyle = '#1b1b1b'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(String(n), 0, -r * 1.9 + 1);
+  g.restore();
+}
+function pageFrame(g, p, title, i, n) {
+  g.fillStyle = '#fff'; g.fillRect(0, 0, A4.w, A4.h);
+  font(g, 600, 20, 'body'); g.fillStyle = RC.muted; g.textAlign = 'left'; g.textBaseline = 'alphabetic';
+  g.fillText(title, A4.m, 56); g.textAlign = 'right'; g.fillText(fmtDate(p.date), A4.w - A4.m, 56);
+  g.strokeStyle = RC.line; g.lineWidth = 2; g.beginPath(); g.moveTo(A4.m, 70); g.lineTo(A4.w - A4.m, 70); g.stroke();
+  g.beginPath(); g.moveTo(A4.m, A4.h - 66); g.lineTo(A4.w - A4.m, A4.h - 66); g.stroke();
+  g.textAlign = 'left'; g.fillText('Pomocnik Inżyniera · ' + p.name, A4.m, A4.h - 36);
+  g.textAlign = 'right'; g.fillText(`Strona ${i} z ${n}`, A4.w - A4.m, A4.h - 36);
+}
+function statusPill(g, x, y, done) {
+  const t = done ? 'USUNIĘTA' : 'DO USUNIĘCIA'; font(g, 700, 18, 'body');
+  const w = g.measureText(t).width + 24; g.fillStyle = done ? '#dff2e6' : '#fbecc9';
+  g.beginPath(); g.roundRect ? g.roundRect(x - w, y - 24, w, 34, 17) : g.rect(x - w, y - 24, w, 34); g.fill();
+  g.fillStyle = done ? '#226b42' : '#6b4a00'; g.textAlign = 'center'; g.fillText(t, x - w / 2, y); g.textAlign = 'left';
+}
+
+async function generateReport() {
+  const p = curProject(); if (!p) return;
+  const defs = projDefects(p.id).sort((a, b) => a.number - b.number);
+  if (!defs.length) { toast('Brak usterek do raportu.'); return; }
+  try {
+    busy(true, 'Tworzenie raportu', 'Wczytywanie czcionek i zdjęć…', 0.05);
+    await Promise.all(['600 20px Barlow', '700 30px "Barlow Condensed"', '700 18px "JetBrains Mono"', '400 20px Barlow'].map((f) => document.fonts.load(f, 'ąęłśżź').catch(() => {})));
+    const plans = (p.plans || []);
+    const planImg = {};
+    for (const pl of plans) planImg[pl.id] = await loadImg(blobUrl(pl.asset));
+    const photoImg = {};
+    let done = 0; const allPh = defs.flatMap((d) => d.photos || []);
+    for (const id of allPh) { photoImg[id] = await loadImg(blobUrl(id)); busy(true, 'Tworzenie raportu', `Zdjęcia ${++done} z ${allPh.length}`, 0.05 + 0.45 * done / allPh.length); }
+
+    const pages = []; // each: (g, i, n) => void
+    const planName = Object.fromEntries(plans.map((x) => [x.id, x.name]));
+    const openN = defs.filter((d) => d.status !== 'done').length;
+
+    // --- Cover + summary table (may continue on following pages) ---
+    const rowH = 46; const firstTop = 760; const contTop = 140; const bottom = A4.h - 110;
+    const rowsFirst = Math.floor((bottom - firstTop) / rowH); const rowsCont = Math.floor((bottom - contTop) / rowH);
+    const chunks = [defs.slice(0, rowsFirst)]; for (let i = rowsFirst; i < defs.length; i += rowsCont) chunks.push(defs.slice(i, i + rowsCont));
+    chunks.forEach((chunk, ci) => pages.push((g, i, n) => {
+      pageFrame(g, p, 'Protokół odbioru lokalu – wykaz usterek', i, n);
+      let top = contTop;
+      if (ci === 0) {
+        font(g, 700, 64, 'cond'); g.fillStyle = RC.ink; g.textAlign = 'left'; g.fillText('Protokół odbioru', A4.m, 180);
+        font(g, 600, 34, 'body'); g.fillText(p.name, A4.m, 236);
+        // Title block
+        const tb = [['Adres', p.address], ['Deweloper', p.developer], ['Nabywca', p.buyer], ['Odbierający', p.inspector], ['Data odbioru', fmtDate(p.date)], ['Liczba usterek', `${defs.length} (do usunięcia: ${openN}, usunięte: ${defs.length - openN})`]];
+        const x0 = A4.m, y0 = 290, cw = (A4.w - 2 * A4.m) / 2, ch = 104;
+        g.strokeStyle = RC.ink; g.lineWidth = 3; g.strokeRect(x0, y0, cw * 2, ch * 3);
+        g.lineWidth = 2; for (let r = 1; r < 3; r++) { g.beginPath(); g.moveTo(x0, y0 + ch * r); g.lineTo(x0 + cw * 2, y0 + ch * r); g.stroke(); }
+        g.beginPath(); g.moveTo(x0 + cw, y0); g.lineTo(x0 + cw, y0 + ch * 3); g.stroke();
+        tb.forEach(([k, v], idx) => {
+          const cx = x0 + (idx % 2) * cw + 20, cy = y0 + Math.floor(idx / 2) * ch;
+          font(g, 600, 17, 'body'); g.fillStyle = RC.muted; g.fillText(k.toUpperCase(), cx, cy + 34);
+          font(g, 600, 25, 'body'); g.fillStyle = RC.ink; const lines = wrap(g, v || '—', cw - 40); g.fillText(lines[0] + (lines.length > 1 ? '…' : ''), cx, cy + 74);
+        });
+        font(g, 700, 30, 'cond'); g.fillStyle = RC.ink; g.fillText('Wykaz usterek', A4.m, 700);
+        top = firstTop;
+      }
+      // Table header
+      const cols = [A4.m, A4.m + 80, A4.m + 360, A4.m + 640, A4.w - A4.m];
+      g.fillStyle = RC.soft; g.fillRect(A4.m, top - rowH + 8, A4.w - 2 * A4.m, rowH);
+      font(g, 700, 17, 'body'); g.fillStyle = RC.muted;
+      ['NR', 'POMIESZCZENIE', 'KATEGORIA', 'OPIS'].forEach((h, k) => g.fillText(h, cols[k] + 12, top - 8));
+      chunk.forEach((d, r) => {
+        const y = top + (r + 1) * rowH;
+        g.strokeStyle = RC.line; g.lineWidth = 1; g.beginPath(); g.moveTo(A4.m, y + 8 - rowH); g.lineTo(A4.w - A4.m, y + 8 - rowH); g.stroke();
+        font(g, 700, 19, 'mono'); g.fillStyle = d.status === 'done' ? '#226b42' : RC.ink; g.fillText(String(d.number), cols[0] + 12, y - 8);
+        font(g, 500, 20, 'body'); g.fillStyle = RC.ink;
+        const clip = (t, w) => { let s = String(t || '—'); if (g.measureText(s).width <= w) return s; while (s && g.measureText(s + '…').width > w) s = s.slice(0, -1); return s + '…'; };
+        g.fillText(clip(d.room, 260), cols[1] + 12, y - 8);
+        g.fillText(clip(d.category, 260), cols[2] + 12, y - 8);
+        g.fillText(clip((d.status === 'done' ? '[usunięta] ' : '') + (d.description || ''), cols[4] - cols[3] - 24), cols[3] + 12, y - 8);
+      });
+    }));
+
+    // --- Plan overview pages ---
+    for (const pl of plans) {
+      const ds = defs.filter((d) => d.plan === pl.id); const img = planImg[pl.id];
+      if (!ds.length || !img) continue;
+      pages.push((g, i, n) => {
+        pageFrame(g, p, 'Rzut z oznaczeniem usterek', i, n);
+        font(g, 700, 40, 'cond'); g.fillStyle = RC.ink; g.textAlign = 'left'; g.fillText(pl.name, A4.m, 140);
+        font(g, 500, 20, 'body'); g.fillStyle = RC.muted; g.fillText(`${ds.length} ${plural(ds.length, 'usterka', 'usterki', 'usterek')} na tym rzucie`, A4.m, 172);
+        const bx = A4.m, by = 200, bw = A4.w - 2 * A4.m, bh = A4.h - 300 - by + 20;
+        g.strokeStyle = RC.line; g.lineWidth = 2; g.strokeRect(bx, by, bw, bh);
+        const { dx, dy, k } = drawContain(g, img, bx + 10, by + 10, bw - 20, bh - 20);
+        for (const d of ds) drawPin(g, dx + d.x * img.width * k, dy + d.y * img.height * k, d.number, d.status === 'done', 17);
+      });
+    }
+
+    // --- Defect cards: flowing layout with all photos; rows break across pages ---
+    const mc = document.createElement('canvas').getContext('2d'); // text measuring
+    const TOP = 100, BOT = A4.h - 96, CW = A4.w - 2 * A4.m, GAP = 20, CELL_W = (CW - 2 * GAP) / 3, CELL_H = 300, ROW_H = CELL_H + 48;
+    const flow = []; let ops = [], fy = TOP;
+    const flush = () => { if (ops.length) flow.push(ops); ops = []; fy = TOP; };
+    const place = (h, draw, keep = 0) => { if (fy + h + keep > BOT && ops.length) flush(); ops.push({ y: fy, draw }); fy += h; };
+    const drawCardHead = (g, d, lines, y0) => {
+      const x0 = A4.m;
+      g.fillStyle = d.status === 'done' ? RC.ok : RC.accent; g.beginPath(); g.arc(x0 + 30, y0 + 46, 30, 0, Math.PI * 2); g.fill();
+      g.lineWidth = 3; g.strokeStyle = '#1b1b1b'; g.stroke();
+      font(g, 700, 26, 'mono'); g.fillStyle = '#1b1b1b'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(String(d.number), x0 + 30, y0 + 47);
+      g.textAlign = 'left'; g.textBaseline = 'alphabetic';
+      font(g, 700, 36, 'cond'); g.fillStyle = RC.ink; g.fillText(d.room || 'Bez lokalizacji', x0 + 80, y0 + 44);
+      font(g, 500, 20, 'body'); g.fillStyle = RC.muted;
+      g.fillText([d.category, planName[d.plan], d.createdAt ? 'zgł. ' + fmtDate(d.createdAt) : ''].filter(Boolean).join(' · '), x0 + 80, y0 + 76);
+      statusPill(g, x0 + CW, y0 + 46, d.status === 'done');
+      font(g, 400, 24, 'body'); g.fillStyle = RC.ink;
+      lines.forEach((ln, li) => g.fillText(ln, x0, y0 + 124 + li * 33));
+    };
+    const drawCardRow = (g, d, row, y) => {
+      row.forEach((cell, k) => {
+        const x = A4.m + k * (CELL_W + GAP);
+        g.strokeStyle = RC.line; g.lineWidth = 2;
+        if (cell.kind === 'plan') {
+          const img = planImg[d.plan]; g.fillStyle = '#fff'; g.fillRect(x, y, CELL_W, CELL_H);
+          if (img) {
+            const side = Math.max(img.width, img.height) * 0.28; const cx = d.x * img.width, cy = d.y * img.height;
+            const crop = { w: Math.min(side, img.width), h: Math.min(side * CELL_H / CELL_W, img.height) };
+            crop.x = Math.min(Math.max(0, cx - crop.w / 2), img.width - crop.w); crop.y = Math.min(Math.max(0, cy - crop.h / 2), img.height - crop.h);
+            g.save(); g.beginPath(); g.rect(x, y, CELL_W, CELL_H); g.clip();
+            const r = drawContain(g, img, x + 2, y + 2, CELL_W - 4, CELL_H - 4, crop);
+            drawPin(g, r.dx + (cx - crop.x) * r.k, r.dy + (cy - crop.y) * r.k, d.number, d.status === 'done', 18); g.restore();
+          }
+          g.strokeRect(x, y, CELL_W, CELL_H);
+          font(g, 600, 16, 'body'); g.fillStyle = RC.muted; g.fillText('LOKALIZACJA NA RZUCIE', x, y + CELL_H + 26);
+        } else {
+          const im = photoImg[cell.id]; g.fillStyle = RC.soft; g.fillRect(x, y, CELL_W, CELL_H);
+          if (im) {
+            // Contain-fit so annotations near the edges stay visible.
+            g.save(); g.beginPath(); g.rect(x, y, CELL_W, CELL_H); g.clip(); drawContain(g, im, x, y, CELL_W, CELL_H); g.restore();
+          }
+          g.strokeRect(x, y, CELL_W, CELL_H);
+          font(g, 600, 16, 'body'); g.fillStyle = RC.muted; g.fillText(`ZDJĘCIE ${cell.j + 1}`, x, y + CELL_H + 26);
+        }
+      });
+    };
+    for (const d of defs) {
+      font(mc, 400, 24, 'body'); let lines = wrap(mc, d.description || '—', CW);
+      if (lines.length > 24) { lines = lines.slice(0, 24); lines[23] += ' …'; }
+      const headH = 104 + lines.length * 33 + 18;
+      const cells = [{ kind: 'plan' }].concat((d.photos || []).map((id, j) => ({ kind: 'photo', id, j })));
+      const rows = []; for (let k = 0; k < cells.length; k += 3) rows.push(cells.slice(k, k + 3));
+      place(headH, (g, y) => drawCardHead(g, d, lines, y), ROW_H);
+      rows.forEach((row) => place(ROW_H, (g, y) => drawCardRow(g, d, row, y)));
+      place(44, (g, y) => { g.strokeStyle = RC.line; g.lineWidth = 2; g.setLineDash([10, 8]); g.beginPath(); g.moveTo(A4.m, y + 16); g.lineTo(A4.w - A4.m, y + 16); g.stroke(); g.setLineDash([]); });
+    }
+    // --- Legal note (art. 41 of the developer act) + signature boxes ---
+    const LEGAL = 'Podstawa: art. 41 ustawy z dnia 20 maja 2021 r. o ochronie praw nabywcy lokalu mieszkalnego lub domu jednorodzinnego oraz Deweloperskim Funduszu Gwarancyjnym. '
+      + 'Deweloper w terminie 14 dni od dnia podpisania protokołu przekazuje nabywcy, na papierze lub innym trwałym nośniku, potwierdzenie uznania wad albo oświadczenie o odmowie ich uznania wraz z uzasadnieniem. '
+      + 'Brak odpowiedzi w tym terminie oznacza uznanie wad. Uznane wady deweloper usuwa w terminie 30 dni od dnia podpisania protokołu.';
+    font(mc, 400, 21, 'body'); const legalLines = wrap(mc, LEGAL, CW);
+    const sigH = 70 + legalLines.length * 30 + 60 + 190;
+    place(sigH, (g, y) => {
+      font(g, 700, 34, 'cond'); g.fillStyle = RC.ink; g.textAlign = 'left'; g.fillText('Ustalenia i podpisy', A4.m, y + 44);
+      font(g, 400, 21, 'body'); g.fillStyle = RC.ink; legalLines.forEach((ln, k) => g.fillText(ln, A4.m, y + 86 + k * 30));
+      const by = y + 86 + legalLines.length * 30 + 50; const bw = (CW - 2 * 30) / 3;
+      [['Przedstawiciel dewelopera', p.developer], ['Nabywca', p.buyer], ['Odbierający', p.inspector]].forEach(([label, name], k) => {
+        const x = A4.m + k * (bw + 30);
+        font(g, 600, 17, 'body'); g.fillStyle = RC.muted; g.fillText(label.toUpperCase(), x, by);
+        g.strokeStyle = RC.ink; g.lineWidth = 2; g.beginPath(); g.moveTo(x, by + 110); g.lineTo(x + bw, by + 110); g.stroke();
+        font(g, 500, 19, 'body'); g.fillStyle = RC.ink; g.fillText(name || '', x, by + 140);
+        font(g, 400, 16, 'body'); g.fillStyle = RC.muted; g.fillText('data i podpis', x, by + 166);
+      });
+    }, 0);
+    flush();
+    flow.forEach((pageOps) => pages.push((g, i, n) => { pageFrame(g, p, 'Karty usterek', i, n); for (const o of pageOps) o.draw(g, o.y); }));
+
+    // --- Draw pages and assemble PDF ---
+    const pdf = new MiniPdf();
+    const c = document.createElement('canvas'); c.width = A4.w; c.height = A4.h; const g = c.getContext('2d');
+    for (let i = 0; i < pages.length; i++) {
+      busy(true, 'Tworzenie raportu', `Strona ${i + 1} z ${pages.length}`, 0.5 + 0.45 * (i / pages.length));
+      g.save(); pages[i](g, i + 1, pages.length); g.restore();
+      const jb = await new Promise((r) => c.toBlob(r, 'image/jpeg', 0.86));
+      pdf.addJpeg(new Uint8Array(await jb.arrayBuffer()), c.width, c.height);
+      await sleep(0);
+    }
+    const blob = pdf.toBlob();
+    busy(false);
+    const fname = `Odbior_${p.name.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ł/g, 'l').replace(/Ł/g, 'L').replace(/[^A-Za-z0-9]+/g, '_').replace(/^_|_$/g, '')}_${p.date || today()}.pdf`;
+    lastReport = { blob, fname };
+    showReportReady(fname, pages.length);
+  } catch (err) {
+    busy(false); toast('Nie udało się utworzyć raportu. Spróbuj ponownie.'); console.error(err);
+  }
+}
+let lastReport = null;
+function showReportReady(fname, n) {
+  fileReady('Raport gotowy', fname, lastReport.blob, `${n} ${plural(n, 'strona', 'strony', 'stron')}`,
+    '„Udostępnij” wyśle raport prosto do WhatsAppa, Messengera, Gmaila lub na Dysk Google. „Zapisz w telefonie” zapisze go w folderze Pobrane.');
+}
+
+// =====================================================================
+// EVENT DELEGATION
+// =====================================================================
+document.addEventListener('click', (e) => {
+  const el = e.target.closest('[data-act]'); if (!el) return;
+  const a = el.dataset.act, id = el.dataset.id;
+  switch (a) {
+    case 'tab':
+      if (el.dataset.tab === 'lib') navigate({ name: 'lib' }); else navigate({ name: 'projects' });
+      break;
+    case 'sheet-close': closeSheet(); break;
+    case 'q-clear': S.query = ''; $('#q').value = ''; el.hidden = true; render(); break;
+    case 'sec': S.libSection = id || null; S.query = ''; if ($('#q')) $('#q').value = ''; render(); window.scrollTo(0, 0); break;
+    case 'sec-new': closeSheet(); openSectionForm(null); break;
+    case 'sec-edit': openSectionForm(S.sections.find((s) => s.id === id)); break;
+    case 'doc-new': closeSheet(); openDocForm(null); break;
+    case 'lib-menu': openLibMenu(); break;
+    case 'open-doc': navigate({ name: 'doc', id }); break;
+    case 'back-lib': navigate({ name: 'lib' }); break;
+    case 'doc-edit': openDocForm(S.docs.find((d) => d.id === id)); break;
+    case 'pdf-open': openViewer(S.docs.find((d) => d.id === id), 1); break;
+    case 'ch-new': openChapterForm(S.docs.find((d) => d.id === id), null); break;
+    case 'ch-open': openChapterForm(S.docs.find((d) => d.id === id), el.dataset.ch); break;
+    case 'viewer-close': closeViewer(); break;
+    case 'vz': zoomViewer(+el.dataset.z); break;
+    case 'proj-new': openProjectForm(null); break;
+    case 'proj-open': navigate({ name: 'project', id }); break;
+    case 'proj-edit': openProjectForm(curProject()); break;
+    case 'back-projects': navigate({ name: 'projects' }); break;
+    case 'plan-new': openPlanForm(null); break;
+    case 'plan-edit': openPlanForm(curPlan()); break;
+    case 'plan-sel': { const pl = (curProject().plans || []).find((x) => x.id === id); setPlan(pl); render(); break; }
+    case 'pz': { const st = $('#stage'); zoomAt(+el.dataset.z > 0 ? 1.4 : 1 / 1.4, st.clientWidth / 2, st.clientHeight / 2); break; }
+    case 'pfit': fitPlan(); break;
+    case 'add-mode': if (PV.moving) { PV.moving = null; PV.sel = null; } else PV.adding = !PV.adding; PV.ghost = null; render(); break;
+    case 'dfilter': PV.filter = el.dataset.f; render(); break;
+    case 'def-open': { const d = S.defects.find((x) => x.id === id); if (d) { window.scrollTo({ top: 0, behavior: 'smooth' }); openDefectForm(d); } break; }
+    case 'report': generateReport(); break;
+    case 'settings': openSettings(); break;
+    case 'backup-now': createBackup(); break;
+  }
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { if (!$('#sheet').hidden) closeSheet(); else if (!$('#viewer').hidden) closeViewer(); } });
+
+render();
+initData();
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  const hadController = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadController) toast('Pobrano nową wersję aplikacji. Zamknij ją i otwórz ponownie.'); });
+}
+</script>
+</body>
+</html>
